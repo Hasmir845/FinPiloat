@@ -32,6 +32,20 @@ class ApiClient {
 
   constructor() {
     let rawUrl = (import.meta.env.VITE_API_URL || '').trim().replace(/\/+$/, '');
+
+    // In production on a public HTTPS domain (like Netlify), if VITE_API_URL is missing or points to localhost,
+    // safely route to the production Render backend so requests do not fail with mixed content or connection refused.
+    if (
+      typeof window !== 'undefined' &&
+      window.location.protocol === 'https:' &&
+      (!rawUrl || rawUrl.includes('localhost') || rawUrl.includes('127.0.0.1'))
+    ) {
+      console.warn(
+        '[ApiClient] Localhost or missing API URL detected on HTTPS origin. Routing to production Render backend.'
+      );
+      rawUrl = 'https://finpiloat-3.onrender.com/api';
+    }
+
     // If user provided the root Render/backend URL without '/api', automatically append '/api'
     if (rawUrl && !rawUrl.endsWith('/api') && !rawUrl.includes('/api/')) {
       rawUrl = `${rawUrl}/api`;
