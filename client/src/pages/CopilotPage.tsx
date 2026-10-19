@@ -97,7 +97,7 @@ export const CopilotPage: React.FC = () => {
     } catch {
       setCopilotStatus({
         configured: false,
-        model: 'gemini-3.5-flash',
+        model: 'gemini-2.5-flash',
         workspace: 'Apex Supply Chain Co.',
         isSingleWorkspaceDemo: true,
         notice: t('copilot:errors.notConfigured'),

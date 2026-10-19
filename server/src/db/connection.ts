@@ -8,6 +8,7 @@ let db: Db | null = null;
 let connectionState: ConnectionState = 'disconnected';
 let lastErrorMessage: string | null = null;
 let connectingPromise: Promise<Db> | null = null;
+let activeDbName: string | null = null;
 
 const DEFAULT_DB_NAME = 'finpilot';
 
@@ -21,10 +22,49 @@ export function sanitizeMongoUri(uri?: string): string {
 }
 
 /**
- * Retrieves the configured database name from environment variables.
+ * Extracts database name from MongoDB connection string URI path if present.
+ * Preserves exact casing (e.g. 'FinPilot').
+ */
+export function extractDbNameFromUri(uri?: string): string | null {
+  if (!uri) return null;
+  try {
+    const normalized = uri.replace(/^mongodb(\+srv)?:\/\//i, 'http://');
+    const parsed = new URL(normalized);
+    const pathname = parsed.pathname.replace(/^\//, '').split('?')[0].trim();
+    if (pathname.length > 0 && !pathname.includes('/')) {
+      return decodeURIComponent(pathname);
+    }
+  } catch {
+    // URL parsing fallback
+  }
+
+  const match = uri.match(/^mongodb(?:\+srv)?:\/\/[^/]+\/([^?/\\]+)/i);
+  if (match && match[1] && match[1].trim().length > 0) {
+    return decodeURIComponent(match[1].trim());
+  }
+
+  return null;
+}
+
+/**
+ * Retrieves the configured database name from environment variables or connection URI.
+ * Respects casing and prioritizes:
+ * 1. MONGODB_DB_NAME
+ * 2. Database specified in MONGODB_URI path
+ * 3. DEFAULT_DB_NAME ('finpilot')
  */
 export function getDatabaseName(): string {
-  return process.env.MONGODB_DB_NAME || DEFAULT_DB_NAME;
+  if (activeDbName && connectionState === 'connected') {
+    return activeDbName;
+  }
+  if (process.env.MONGODB_DB_NAME && process.env.MONGODB_DB_NAME.trim().length > 0) {
+    return process.env.MONGODB_DB_NAME.trim();
+  }
+  const fromUri = extractDbNameFromUri(process.env.MONGODB_URI);
+  if (fromUri) {
+    return fromUri;
+  }
+  return DEFAULT_DB_NAME;
 }
 
 /**
@@ -46,7 +86,7 @@ export function getConnectionStatus(): {
   const configured = Boolean(process.env.MONGODB_URI && process.env.MONGODB_URI.trim().length > 0);
   return {
     state: connectionState,
-    dbName: getDatabaseName(),
+    dbName: activeDbName || getDatabaseName(),
     configured,
     message: lastErrorMessage || (isDatabaseConnected() ? 'Connected to MongoDB Atlas' : undefined),
   };
@@ -110,12 +150,41 @@ export async function connectDatabase(): Promise<Db> {
       const newClient = new MongoClient(uri, options);
       await newClient.connect();
 
+      let resolvedDbName = getDatabaseName();
+
+      // Case-sensitivity guard for MongoDB Atlas WiredTiger engines:
+      // If a database already exists whose name differs only by letter casing (e.g. 'FinPilot' vs 'finpilot'),
+      // MongoDB throws: "db already exists with different case already have: [FinPilot] trying to create [finpilot]".
+      // We proactively inspect existing databases and align with the existing database casing.
+      try {
+        const adminDb = newClient.db().admin();
+        const dbList = await adminDb.listDatabases({ nameOnly: true });
+        if (dbList && Array.isArray(dbList.databases)) {
+          const matchedDb = dbList.databases.find(
+            (item: { name?: string }) =>
+              typeof item?.name === 'string' &&
+              item.name.toLowerCase() === resolvedDbName.toLowerCase()
+          );
+          if (matchedDb?.name) {
+            if (matchedDb.name !== resolvedDbName) {
+              console.log(
+                `[MongoDB] Aligning database name case: using existing database '${matchedDb.name}' instead of '${resolvedDbName}'`
+              );
+            }
+            resolvedDbName = matchedDb.name;
+          }
+        }
+      } catch {
+        // If MongoDB user lacks listDatabases admin privilege, continue with resolvedDbName
+      }
+
       // Verify connectivity via ping command
-      const database = newClient.db(dbName);
+      const database = newClient.db(resolvedDbName);
       await database.command({ ping: 1 });
 
       client = newClient;
       db = database;
+      activeDbName = resolvedDbName;
       connectionState = 'connected';
       lastErrorMessage = null;
 
@@ -134,6 +203,7 @@ export async function connectDatabase(): Promise<Db> {
         }
         client = null;
         db = null;
+        activeDbName = null;
       }
 
       throw new AppError(
@@ -169,12 +239,14 @@ export async function disconnectDatabase(): Promise<void> {
     } finally {
       client = null;
       db = null;
+      activeDbName = null;
       connectionState = 'disconnected';
       lastErrorMessage = null;
     }
   } else {
     connectionState = 'disconnected';
     db = null;
+    activeDbName = null;
     lastErrorMessage = null;
   }
 }
@@ -187,5 +259,6 @@ export function setDatabaseInstanceForTesting(mockDb: Db | null, mockClient?: Mo
   client = mockClient || null;
   connectingPromise = null;
   connectionState = mockDb ? 'connected' : 'disconnected';
+  activeDbName = mockDb ? getDatabaseName() : null;
   lastErrorMessage = null;
 }
