@@ -37,6 +37,11 @@ export const createApp = (): Application => {
       : [...defaultDevOrigins, ...envOrigins]
   );
 
+  // Regex to recognize any Netlify origin (*.netlify.app)
+  const isNetlifyOrigin = (origin: string): boolean => {
+    return /^https:\/\/[a-zA-Z0-9_.-]+\.netlify\.app$/.test(origin);
+  };
+
   // Regex to recognize any local loopback development origin (disabled in production)
   const isLocalDevOrigin = (origin: string): boolean => {
     if (process.env.NODE_ENV === 'production') {
@@ -61,8 +66,12 @@ export const createApp = (): Application => {
 
     const normalizedOrigin = origin.replace(/\/+$/, '');
 
-    // Allow explicitly defined origins or local development origins
-    if (allowedOriginsSet.has(normalizedOrigin) || isLocalDevOrigin(normalizedOrigin)) {
+    // Allow explicitly defined origins, Netlify origins, or local development origins
+    if (
+      allowedOriginsSet.has(normalizedOrigin) ||
+      isNetlifyOrigin(normalizedOrigin) ||
+      isLocalDevOrigin(normalizedOrigin)
+    ) {
       return callback(null, true);
     }
 
@@ -86,6 +95,11 @@ export const createApp = (): Application => {
   // Fast 204 handler for browser favicon requests (avoids 404/504 overhead)
   app.get('/favicon.ico', (_req: Request, res: Response): void => {
     res.status(204).end();
+  });
+
+  // Health check endpoint alias at root /health for direct health probes
+  app.get('/health', (req: Request, res: Response): void => {
+    getHealth(req, res);
   });
 
   // Root status endpoint (fast, zero external dependencies, no database/AI dependencies)

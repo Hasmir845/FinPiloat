@@ -31,8 +31,13 @@ class ApiClient {
   private baseUrl: string;
 
   constructor() {
-    // In Vite dev with proxy, '/api' can work directly or fall back to VITE_API_URL
-    this.baseUrl = import.meta.env.VITE_API_URL || '/api';
+    let rawUrl = (import.meta.env.VITE_API_URL || '').trim().replace(/\/+$/, '');
+    // If user provided the root Render/backend URL without '/api', automatically append '/api'
+    if (rawUrl && !rawUrl.endsWith('/api') && !rawUrl.includes('/api/')) {
+      rawUrl = `${rawUrl}/api`;
+    }
+    this.baseUrl = rawUrl || '/api';
+    console.info(`[ApiClient] Configured backend endpoint: ${this.baseUrl}`);
   }
 
   private async request<T>(
