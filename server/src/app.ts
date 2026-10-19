@@ -70,6 +70,29 @@ export const createApp = (): Application => {
   app.use(express.json({ limit: '200kb' }));
   app.use(express.urlencoded({ extended: true, limit: '200kb' }));
 
+  // Fast 204 handler for browser favicon requests (avoids 404/504 overhead)
+  app.get('/favicon.ico', (_req, res) => {
+    res.status(204).end();
+  });
+
+  // Root status endpoint (fast, zero external dependencies, no database/AI dependencies)
+  app.get('/', (_req, res) => {
+    res.status(200).json({
+      status: 'ok',
+      service: 'FinPilot AI Backend API',
+      version: '0.1.0',
+      environment: process.env.NODE_ENV || 'development',
+      timestamp: new Date().toISOString(),
+      endpoints: {
+        health: '/api/health',
+        transactions: '/api/transactions',
+        financial: '/api/financial/summary',
+        copilot: '/api/copilot/status',
+        financing: '/api/financing/readiness',
+      },
+    });
+  });
+
   // Global rate limiter on all API endpoints
   app.use('/api', apiRateLimiter);
 
@@ -85,4 +108,6 @@ export const createApp = (): Application => {
   return app;
 };
 
-export default createApp;
+// Pre-instantiated app for serverless export
+export const app = createApp();
+export default app;

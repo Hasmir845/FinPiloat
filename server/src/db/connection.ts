@@ -7,6 +7,7 @@ let client: MongoClient | null = null;
 let db: Db | null = null;
 let connectionState: ConnectionState = 'disconnected';
 let lastErrorMessage: string | null = null;
+let connectingPromise: Promise<Db> | null = null;
 
 const DEFAULT_DB_NAME = 'finpilot';
 
@@ -67,6 +68,7 @@ export function getDatabase(): Db {
 
 /**
  * Establishes a persistent connection pool to MongoDB Atlas.
+ * Caches in-flight connection promise to prevent race conditions and connection storms in serverless environments.
  */
 export async function connectDatabase(): Promise<Db> {
   const uri = process.env.MONGODB_URI;
@@ -85,59 +87,82 @@ export async function connectDatabase(): Promise<Db> {
     return db;
   }
 
+  // If already connecting, reuse the in-flight promise
+  if (connectingPromise) {
+    return connectingPromise;
+  }
+
   connectionState = 'connecting';
   lastErrorMessage = null;
 
   const dbName = getDatabaseName();
 
   const options: MongoClientOptions = {
-    serverSelectionTimeoutMS: 5000, // 5s timeout to fail quickly if cluster unreachable
-    connectTimeoutMS: 5000,
+    serverSelectionTimeoutMS: 4000, // 4s timeout to fail quickly in serverless environments
+    connectTimeoutMS: 4000,
+    socketTimeoutMS: 8000,
     maxPoolSize: 10,
-    minPoolSize: 1,
+    minPoolSize: 0,
   };
 
-  try {
-    const newClient = new MongoClient(uri, options);
-    await newClient.connect();
+  connectingPromise = (async () => {
+    try {
+      const newClient = new MongoClient(uri, options);
+      await newClient.connect();
 
-    // Verify connectivity via ping command
-    const database = newClient.db(dbName);
-    await database.command({ ping: 1 });
+      // Verify connectivity via ping command
+      const database = newClient.db(dbName);
+      await database.command({ ping: 1 });
 
-    client = newClient;
-    db = database;
-    connectionState = 'connected';
-    lastErrorMessage = null;
+      client = newClient;
+      db = database;
+      connectionState = 'connected';
+      lastErrorMessage = null;
 
-    return db;
-  } catch (error: unknown) {
-    connectionState = 'error';
-    const rawMessage = error instanceof Error ? error.message : 'Unknown connection failure';
-    // Ensure credentials never leak in stored error message
-    lastErrorMessage = sanitizeMongoUri(rawMessage);
+      return db;
+    } catch (error: unknown) {
+      connectionState = 'error';
+      const rawMessage = error instanceof Error ? error.message : 'Unknown connection failure';
+      // Ensure credentials never leak in stored error message
+      lastErrorMessage = sanitizeMongoUri(rawMessage);
 
-    if (client) {
-      try {
-        await client.close();
-      } catch {
-        // Ignore close error during teardown
+      if (client) {
+        try {
+          await client.close();
+        } catch {
+          // Ignore close error during teardown
+        }
+        client = null;
+        db = null;
       }
-      client = null;
-      db = null;
-    }
 
-    throw new AppError(
-      `Failed to establish connection to MongoDB Atlas: ${lastErrorMessage}`,
-      503
-    );
+      throw new AppError(
+        `Failed to establish connection to MongoDB Atlas: ${lastErrorMessage}`,
+        503
+      );
+    } finally {
+      connectingPromise = null;
+    }
+  })();
+
+  return connectingPromise;
+}
+
+/**
+ * Returns active database instance or lazily initiates connection if not yet connected.
+ */
+export async function ensureDatabaseConnected(): Promise<Db> {
+  if (db && connectionState === 'connected') {
+    return db;
   }
+  return connectDatabase();
 }
 
 /**
  * Closes the active MongoDB connection pool cleanly.
  */
 export async function disconnectDatabase(): Promise<void> {
+  connectingPromise = null;
   if (client) {
     try {
       await client.close();
@@ -160,6 +185,7 @@ export async function disconnectDatabase(): Promise<void> {
 export function setDatabaseInstanceForTesting(mockDb: Db | null, mockClient?: MongoClient | null): void {
   db = mockDb;
   client = mockClient || null;
+  connectingPromise = null;
   connectionState = mockDb ? 'connected' : 'disconnected';
   lastErrorMessage = null;
 }

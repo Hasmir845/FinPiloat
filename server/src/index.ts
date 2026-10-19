@@ -11,9 +11,15 @@ import {
 import { transactionRepository } from './repositories/transactionRepository';
 
 const PORT = process.env.PORT || 5001;
-const app = createApp();
+export const app = createApp();
 
-async function startServer(): Promise<void> {
+const isServerless = Boolean(
+  process.env.VERCEL ||
+  process.env.AWS_LAMBDA_FUNCTION_NAME ||
+  process.env.NOW_REGION
+);
+
+export async function startServer(): Promise<void> {
   const uri = process.env.MONGODB_URI;
 
   if (uri && uri.trim().length > 0) {
@@ -71,7 +77,26 @@ async function startServer(): Promise<void> {
   process.on('SIGINT', () => handleShutdown('SIGINT'));
 }
 
-startServer().catch((fatalError) => {
-  console.error('[FinPilot Server] Fatal server startup error:', fatalError);
-  process.exit(1);
-});
+// Detect if running directly as standalone CLI entry point (npm run dev / npm run start).
+// In Vercel serverless or during test imports, do not bind to port or start background listener.
+const isDirectExecution = (): boolean => {
+  if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NOW_REGION) {
+    return false;
+  }
+  const entry = process.argv[1] || '';
+  return (
+    entry.endsWith('src/index.ts') ||
+    entry.endsWith('src\\index.ts') ||
+    entry.endsWith('dist/index.js') ||
+    entry.endsWith('dist\\index.js')
+  );
+};
+
+if (isDirectExecution()) {
+  startServer().catch((fatalError) => {
+    console.error('[FinPilot Server] Fatal server startup error:', fatalError);
+    process.exit(1);
+  });
+}
+
+export default app;

@@ -1,6 +1,6 @@
 import { Collection, Db, Filter, Sort } from 'mongodb';
 import { Transaction, CreateTransactionInput, UpdateTransactionInput, TransactionType, PaymentStatus } from '../types';
-import { getDatabase } from '../db/connection';
+import { getDatabase, connectDatabase, isDatabaseConnected } from '../db/connection';
 import { AppError } from '../middleware/errorHandler';
 
 /**
@@ -374,14 +374,18 @@ function mapDocToTransaction(doc: any): Transaction {
 }
 
 export class TransactionRepository {
-  private dbGetter: () => Db;
+  private dbGetter: () => Db | Promise<Db>;
 
-  constructor(dbGetter: () => Db = getDatabase) {
+  constructor(dbGetter: () => Db | Promise<Db> = getDatabase) {
     this.dbGetter = dbGetter;
   }
 
-  private getCollection(): Collection<any> {
-    const db = this.dbGetter();
+  private async getCollection(): Promise<Collection<any>> {
+    // In serverless environments, lazily establish and cache connection on first database query when using default getDatabase
+    if (this.dbGetter === getDatabase && !isDatabaseConnected() && process.env.MONGODB_URI && process.env.MONGODB_URI.trim().length > 0) {
+      await connectDatabase();
+    }
+    const db = await this.dbGetter();
     return db.collection('transactions');
   }
 
@@ -398,7 +402,7 @@ export class TransactionRepository {
     sortBy?: 'date' | 'amount';
     sortOrder?: 'asc' | 'desc';
   }): Promise<Transaction[]> {
-    const collection = this.getCollection();
+    const collection = await this.getCollection();
     const query: Filter<any> = {};
 
     if (filters) {
@@ -446,7 +450,7 @@ export class TransactionRepository {
    * Retrieves a single transaction by its unique ID.
    */
   public async getById(id: string): Promise<Transaction | null> {
-    const collection = this.getCollection();
+    const collection = await this.getCollection();
     const doc = await collection.findOne({ id }, { projection: { _id: 0 } });
     return doc ? mapDocToTransaction(doc) : null;
   }
@@ -455,7 +459,7 @@ export class TransactionRepository {
    * Creates a new transaction and persists it in MongoDB.
    */
   public async create(data: CreateTransactionInput): Promise<Transaction> {
-    const collection = this.getCollection();
+    const collection = await this.getCollection();
 
     const newTx: Transaction = {
       id: `tx-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 7)}`,
@@ -483,7 +487,7 @@ export class TransactionRepository {
    * Updates an existing transaction by ID. Preserves original ID and createdAt.
    */
   public async update(id: string, data: UpdateTransactionInput): Promise<Transaction | null> {
-    const collection = this.getCollection();
+    const collection = await this.getCollection();
     const existing = await this.getById(id);
     if (!existing) return null;
 
@@ -523,7 +527,7 @@ export class TransactionRepository {
    * Deletes a transaction by ID.
    */
   public async delete(id: string): Promise<boolean> {
-    const collection = this.getCollection();
+    const collection = await this.getCollection();
     const deleteResult = await collection.deleteOne({ id });
 
     if (!deleteResult.acknowledged) {
@@ -537,7 +541,7 @@ export class TransactionRepository {
    * Resets the database collection back to the initial demonstration seed dataset.
    */
   public async resetToSeed(): Promise<Transaction[]> {
-    const collection = this.getCollection();
+    const collection = await this.getCollection();
     await collection.deleteMany({});
     const seedDocs = SEED_TRANSACTIONS.map((tx) => ({ ...tx }));
     const insertResult = await collection.insertMany(seedDocs);
@@ -554,7 +558,7 @@ export class TransactionRepository {
    * and creates database indexes for performance and integrity.
    */
   public async seedIfEmpty(): Promise<void> {
-    const collection = this.getCollection();
+    const collection = await this.getCollection();
 
     // Create indexes safely
     try {

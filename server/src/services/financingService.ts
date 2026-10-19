@@ -619,7 +619,7 @@ INSTRUCTIONS:
     : ''
 }`;
 
-      const response = await ai.models.generateContent({
+      const generatePromise = ai.models.generateContent({
         model,
         contents: prompt,
         config: {
@@ -627,6 +627,15 @@ INSTRUCTIONS:
           maxOutputTokens: 1200,
         },
       });
+
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        const timer = setTimeout(() => {
+          reject(new Error('Gemini financing narrative timed out after 18 seconds.'));
+        }, 18_000);
+        timer.unref?.();
+      });
+
+      const response = await Promise.race([generatePromise, timeoutPromise]);
 
       if (response.text && response.text.trim().length > 0) {
         return response.text.trim();

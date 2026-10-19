@@ -23,7 +23,7 @@ import { AppError } from '../middleware/errorHandler';
 import { formatCurrency } from '../utils/formatting';
 
 const DEFAULT_MODEL = 'gemini-3.5-flash';
-const REQUEST_TIMEOUT_MS = 25_000;
+const REQUEST_TIMEOUT_MS = 18_000;
 const WORKSPACE_NAME = 'Apex Supply Chain Co.';
 
 // Testing hook to allow mocking AI client in automated unit tests
