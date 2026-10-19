@@ -94,7 +94,7 @@
    - **Region:** Choose region closest to your MongoDB Atlas cluster (e.g., `Oregon (US West)` or `Frankfurt (EU Central)`)
    - **Root Directory:** `server`
    - **Environment:** `Node`
-   - **Build Command:** `npm install && npm run build`
+   - **Build Command:** `npm install --include=dev && npm run build`
    - **Start Command:** `npm run start`
    - **Health Check Path:** `/api/health`
 5. Under **Environment Variables**, add:

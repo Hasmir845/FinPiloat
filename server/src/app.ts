@@ -1,5 +1,5 @@
-import express, { Application } from 'express';
-import cors from 'cors';
+import express, { Application, Request, Response } from 'express';
+import cors, { CorsOptions } from 'cors';
 import routes from './routes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { securityHeaders } from './middleware/securityHeaders';
@@ -45,27 +45,34 @@ export const createApp = (): Application => {
     return /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
   };
 
+  const corsOriginCallback: CorsOptions['origin'] = (
+    origin: string | undefined,
+    callback: (err: Error | null, allow?: boolean) => void
+  ): void => {
+    // Allow requests with no origin (mobile apps, curl, server-to-server)
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    // Allow wildcard if explicitly configured
+    if (allowedOriginsSet.has('*')) {
+      return callback(null, true);
+    }
+
+    const normalizedOrigin = origin.replace(/\/+$/, '');
+
+    // Allow explicitly defined origins or local development origins
+    if (allowedOriginsSet.has(normalizedOrigin) || isLocalDevOrigin(normalizedOrigin)) {
+      return callback(null, true);
+    }
+
+    // Clean rejection without crashing Express with 500 error
+    return callback(null, false);
+  };
+
   app.use(
     cors({
-      origin: (origin, callback) => {
-        // Allow requests with no origin (mobile apps, curl, server-to-server)
-        if (!origin) return callback(null, true);
-
-        // Allow wildcard if explicitly configured
-        if (allowedOriginsSet.has('*')) {
-          return callback(null, true);
-        }
-
-        const normalizedOrigin = origin.replace(/\/+$/, '');
-
-        // Allow explicitly defined origins or local development origins
-        if (allowedOriginsSet.has(normalizedOrigin) || isLocalDevOrigin(normalizedOrigin)) {
-          return callback(null, true);
-        }
-
-        // Clean rejection without crashing Express with 500 error
-        return callback(null, false);
-      },
+      origin: corsOriginCallback,
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
@@ -77,12 +84,12 @@ export const createApp = (): Application => {
   app.use(express.urlencoded({ extended: true, limit: '200kb' }));
 
   // Fast 204 handler for browser favicon requests (avoids 404/504 overhead)
-  app.get('/favicon.ico', (_req, res) => {
+  app.get('/favicon.ico', (_req: Request, res: Response): void => {
     res.status(204).end();
   });
 
   // Root status endpoint (fast, zero external dependencies, no database/AI dependencies)
-  app.get('/', (_req, res) => {
+  app.get('/', (_req: Request, res: Response): void => {
     res.status(200).json({
       status: 'ok',
       service: 'FinPilot AI Backend API',

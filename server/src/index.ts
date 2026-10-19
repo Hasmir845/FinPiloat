@@ -98,7 +98,7 @@ const isDirectExecution = (): boolean => {
 };
 
 if (isDirectExecution()) {
-  startServer().catch((fatalError) => {
+  startServer().catch((fatalError: unknown) => {
     console.error('[FinPilot Server] Fatal server startup error:', fatalError);
     process.exit(1);
   });
