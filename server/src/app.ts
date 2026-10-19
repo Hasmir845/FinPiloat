@@ -4,6 +4,7 @@ import routes from './routes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { securityHeaders } from './middleware/securityHeaders';
 import { apiRateLimiter } from './middleware/rateLimiter';
+import { getHealth } from './controllers/healthController';
 
 export const createApp = (): Application => {
   const app = express();
