@@ -1,0 +1,26 @@
+{
+  "name": "finpilot-ai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "FinPilot AI — SME Finance Copilot",
+  "scripts": {
+    "dev:client": "npm run dev --prefix client",
+    "dev:server": "npm run dev --prefix server",
+    "build:client": "npm run build --prefix client",
+    "build:server": "npm run build --prefix server",
+    "typecheck:client": "npm run typecheck --prefix client",
+    "typecheck:server": "npm run typecheck --prefix server",
+    "typecheck": "npm run typecheck:server && npm run typecheck:client",
+    "test": "npm run test --prefix server",
+    "build": "npm run build:server && npm run build:client"
+  },
+  "keywords": [
+    "fintech",
+    "sme",
+    "finance",
+    "copilot",
+    "cash-flow"
+  ],
+  "author": "FinPilot Team",
+  "license": "UNLICENSED"
+}
