@@ -1,0 +1,65 @@
+{
+  "header": {
+    "title": "Executive Financial Dashboard",
+    "description": "Real-time operating cash intelligence, automated cash-burn tracking, and risk alerts for small and medium enterprises.",
+    "addTransaction": "Add Transaction",
+    "refresh": "Refresh Metrics",
+    "exportSuccess": "Export completed: Ledger CSV downloaded successfully.",
+    "resetSuccess": "Dashboard refreshed: Ledger synchronized with MongoDB."
+  },
+  "metrics": {
+    "currentCash": "Current Cash Balance",
+    "currentCashTooltip": "Operating liquidity currently in bank accounts based on verified paid transactions plus configured opening balance.",
+    "netCashFlow": "Net Cash Flow",
+    "netCashFlowTooltip": "Difference between total paid income and paid expenses across the recorded operational history.",
+    "pendingReceivables": "Pending Receivables (AR)",
+    "pendingReceivablesTooltip": "Invoiced customer payments awaiting collection. Uncollected funds are not counted in current cash balance.",
+    "pendingPayables": "Pending Payables (AP)",
+    "pendingPayablesTooltip": "Scheduled supplier bills and obligations pending payment settlement.",
+    "runway": "Estimated Runway",
+    "runwayMonths": "{{months}} Months",
+    "runwayTooltip": "Calculated operational survival runway based on average net burn rate and current cash balance.",
+    "stableRunway": "Positive net flow — cash accretive",
+    "burnRate": "Net Burn Rate",
+    "burnPerDay": "{{amount}}/day",
+    "openingBalance": "Opening Balance",
+    "unconfigured": "Unconfigured ($100k Default)",
+    "positiveFlow": "Positive Cash Flow",
+    "cashDeficit": "Operating Deficit"
+  },
+  "charts": {
+    "overviewTitle": "Cash Flow Velocity & Monthly Performance",
+    "overviewDesc": "Monthly breakdown comparing paid customer inflows, operational expenses, and resulting net cash movements.",
+    "forecastTitle": "30-Day Cash Flow Projection",
+    "forecastDesc": "Deterministic forward projection incorporating conservative collection timing and verified run-rate.",
+    "inflow": "Inflow (Income)",
+    "outflow": "Outflow (Expenses)",
+    "net": "Net Cash Flow",
+    "closing": "Closing Balance",
+    "projectedCash": "Projected Cash",
+    "noChartData": "Insufficient historical transactions to render chart."
+  },
+  "alerts": {
+    "sectionTitle": "Active Risk Alerts & Liquidity Warnings",
+    "sectionDesc": "Automated anomaly and cash shortfall detection triggered by backend risk analysis algorithms.",
+    "noAlertsTitle": "Healthy Cash Flow — No Critical Warnings",
+    "noAlertsDesc": "Your operating cash velocity and reserves currently meet baseline stability thresholds.",
+    "severityHigh": "High Risk",
+    "severityMedium": "Moderate Risk",
+    "severityLow": "Low Risk",
+    "suggestedAction": "Recommended Mitigation",
+    "relatedTransaction": "Related Record",
+    "viewTransactions": "Review Transactions",
+    "runwayAlertTitle": "Accelerated Cash Burn Warning",
+    "shortageAlertTitle": "Projected Cash Shortfall",
+    "overdueAlertTitle": "Pending Receivables Aging Overdue"
+  },
+  "quickActions": {
+    "title": "Quick Actions",
+    "recordIncome": "Record Customer Income",
+    "recordExpense": "Log Business Expense",
+    "viewForecast": "Inspect 30-Day Forecast",
+    "exploreFinancing": "Explore Financing Options",
+    "askCopilot": "Ask Finance Copilot"
+  }
+}

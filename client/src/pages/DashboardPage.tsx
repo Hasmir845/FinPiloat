@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FinancialSummaryGrid } from '../components/dashboard/FinancialSummaryGrid';
 import { CashFlowOverviewChart } from '../components/dashboard/CashFlowOverviewChart';
 import { RecentAlertsList } from '../components/dashboard/RecentAlertsList';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/common/Card';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { Button } from '../components/common/Button';
-import { formatCurrency } from '../lib/utils';
+import { formatCurrency, formatDate, formatNumber } from '../lib/utils';
 import { useFinancial } from '../context/FinancialContext';
 import { Link } from 'react-router-dom';
 import {
@@ -23,10 +24,12 @@ import {
 
 export const DashboardPage: React.FC = () => {
   const { transactions, summary, resetDemoData, loading } = useFinancial();
+  const { t } = useTranslation(['dashboard', 'common', 'nav', 'transactions']);
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
   const [resetting, setResetting] = useState(false);
+  const [statusBanner, setStatusBanner] = useState<string | null>(null);
 
-  // Take the 5 most recent transactions
+  // Take the 6 most recent transactions
   const recentTransactions = transactions
     .filter((tx) => {
       if (filterType === 'all') return true;
@@ -38,10 +41,36 @@ export const DashboardPage: React.FC = () => {
     setResetting(true);
     try {
       await resetDemoData();
-      alert('Demo dataset has been reset to its initial illustrative state.');
+      setStatusBanner(t('dashboard:header.resetSuccess'));
+      setTimeout(() => setStatusBanner(null), 4000);
     } finally {
       setResetting(false);
     }
+  };
+
+  const handleExportCsv = () => {
+    if (!transactions || transactions.length === 0) return;
+    const headers = ['ID', 'Date', 'Type', 'Category', 'Description', 'Counterparty', 'Amount', 'Status'];
+    const rows = transactions.map((tx) => [
+      tx.id,
+      tx.date,
+      tx.type,
+      `"${tx.category}"`,
+      `"${tx.description.replace(/"/g, '""')}"`,
+      `"${(tx.counterparty || '').replace(/"/g, '""')}"`,
+      tx.amount.toFixed(2),
+      tx.status,
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `finpilot_ledger_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setStatusBanner(t('dashboard:header.exportSuccess'));
+    setTimeout(() => setStatusBanner(null), 4000);
   };
 
   return (
@@ -51,18 +80,18 @@ export const DashboardPage: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-              Financial Health Overview
+              {t('dashboard:header.title')}
             </h1>
             <StatusBadge variant="demo" size="md">
-              Illustrative Demo Data
+              {t('common:badges.illustrativeDemo')}
             </StatusBadge>
           </div>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 flex items-center gap-2">
             <Building className="w-3.5 h-3.5 text-slate-400" />
-            <span>Apex Supply Chain Co. (SME Demo Profile)</span>
+            <span>{t('nav:workspace.title')} ({t('nav:workspace.subtitle')})</span>
             <span>&bull;</span>
             <Calendar className="w-3.5 h-3.5 text-slate-400" />
-            <span>As of: {summary?.asOfDate || 'Oct 12, 2026'}</span>
+            <span>{t('common:timeframes.asOf', { date: formatDate(summary?.asOfDate || '2026-10-12') })}</span>
           </p>
         </div>
 
@@ -73,46 +102,47 @@ export const DashboardPage: React.FC = () => {
             onClick={handleReset}
             isLoading={resetting}
             leftIcon={<RotateCcw className="w-3.5 h-3.5 text-slate-500" />}
-            title="Reset dataset back to default seed"
+            title={t('common:buttons.refresh')}
           >
-            Reset Demo Data
+            {t('common:buttons.refresh')}
           </Button>
 
           <Button
             variant="outline"
             size="sm"
-            onClick={() => {
-              alert(
-                'Demo export triggered. In production, this generates a comprehensive PDF executive summary of monthly cash flow.'
-              );
-            }}
+            onClick={handleExportCsv}
             leftIcon={<Download className="w-3.5 h-3.5" />}
           >
-            Export Report
+            {t('transactions:header.exportCsv')}
           </Button>
 
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => {
-              if (summary) {
-                alert(
-                  `Baseline Projection Summary:\nCurrent Cash: ${formatCurrency(
-                    summary.currentCashBalance
-                  )}\nProjected Ending (30d): ${formatCurrency(
-                    summary.baseline30DayProjection.projectedEndingBalance
-                  )}\nNet Run-rate Change: ${formatCurrency(
-                    summary.baseline30DayProjection.projectedNetChange
-                  )}\n\nMethod: ${summary.baseline30DayProjection.baselineMethod}`
-                );
-              }
-            }}
-            leftIcon={<Sparkles className="w-3.5 h-3.5" />}
-          >
-            Run Scenario
-          </Button>
+          <Link to="/copilot">
+            <Button
+              variant="primary"
+              size="sm"
+              leftIcon={<Sparkles className="w-3.5 h-3.5" />}
+            >
+              {t('dashboard:quickActions.askCopilot')}
+            </Button>
+          </Link>
         </div>
       </div>
+
+      {/* Action Notification Banner */}
+      {statusBanner && (
+        <div className="p-3 bg-emerald-50 border border-emerald-200/80 rounded-xl text-emerald-900 text-xs flex items-center justify-between shadow-subtle animate-fade-in">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <span>{statusBanner}</span>
+          </div>
+          <button
+            onClick={() => setStatusBanner(null)}
+            className="text-emerald-700 hover:text-emerald-950 font-bold ml-2 text-sm"
+          >
+            &times;
+          </button>
+        </div>
+      )}
 
       {/* KPI Metric Cards connected to Financial Context */}
       <FinancialSummaryGrid />
@@ -127,21 +157,23 @@ export const DashboardPage: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                  Next-30-Day Baseline Forecast
+                  {t('dashboard:charts.forecastTitle')}
                 </span>
                 <StatusBadge variant="info" size="sm">
-                  Deterministic Model
+                  {t('common:badges.forecast')}
                 </StatusBadge>
               </div>
               <p className="text-xs text-slate-600 mt-0.5">
-                Projected ending cash position based on trailing 60-day operating velocity and verified invoice ledger.
+                {t('dashboard:charts.forecastDesc')}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-6 text-xs shrink-0 self-end md:self-center">
             <div>
-              <span className="text-[11px] text-slate-400 block font-medium">Projected 30d Ending</span>
+              <span className="text-[11px] text-slate-400 block font-medium">
+                {t('cashflow:forecastSection.projectedEnding')}
+              </span>
               <span
                 className={`text-base font-bold font-mono ${
                   summary.baseline30DayProjection.projectedEndingBalance < 0
@@ -154,7 +186,9 @@ export const DashboardPage: React.FC = () => {
             </div>
 
             <div>
-              <span className="text-[11px] text-slate-400 block font-medium">Projected Net Drift</span>
+              <span className="text-[11px] text-slate-400 block font-medium">
+                {t('cashflow:forecastSection.netForecastChange')}
+              </span>
               <span
                 className={`text-base font-bold font-mono ${
                   summary.baseline30DayProjection.projectedNetChange >= 0
@@ -169,7 +203,7 @@ export const DashboardPage: React.FC = () => {
 
             <Link to="/cash-flow">
               <Button variant="outline" size="sm" rightIcon={<ArrowRight className="w-3.5 h-3.5" />}>
-                View Forecast
+                {t('common:buttons.viewDetails')}
               </Button>
             </Link>
           </div>
@@ -191,13 +225,13 @@ export const DashboardPage: React.FC = () => {
         <CardHeader>
           <div>
             <div className="flex items-center gap-2">
-              <CardTitle>Recent Operating Ledger</CardTitle>
+              <CardTitle>{t('transactions:header.title')}</CardTitle>
               <StatusBadge variant="demo" size="sm">
-                Live Data Engine
+                {t('common:badges.liveEngine')}
               </StatusBadge>
             </div>
             <CardDescription>
-              Latest cash transactions impacting operating runway and working capital
+              {t('transactions:header.description')}
             </CardDescription>
           </div>
 
@@ -211,7 +245,7 @@ export const DashboardPage: React.FC = () => {
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                All
+                {t('transactions:types.all')}
               </button>
               <button
                 onClick={() => setFilterType('income')}
@@ -221,7 +255,7 @@ export const DashboardPage: React.FC = () => {
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                Income
+                {t('transactions:types.income')}
               </button>
               <button
                 onClick={() => setFilterType('expense')}
@@ -231,13 +265,13 @@ export const DashboardPage: React.FC = () => {
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                Expense
+                {t('transactions:types.expense')}
               </button>
             </div>
 
             <Link to="/transactions">
               <Button variant="outline" size="sm" rightIcon={<ArrowRight className="w-3.5 h-3.5" />}>
-                View All ({transactions.length})
+                {t('common:buttons.viewDetails')} ({formatNumber(transactions.length)})
               </Button>
             </Link>
           </div>
@@ -245,25 +279,29 @@ export const DashboardPage: React.FC = () => {
 
         <CardContent className="p-0 overflow-x-auto">
           {loading ? (
-            <div className="p-6 text-center text-xs text-slate-400">Loading ledger items...</div>
+            <div className="p-6 text-center text-xs text-slate-400">
+              {t('common:states.loadingData')}
+            </div>
           ) : recentTransactions.length === 0 ? (
-            <div className="p-6 text-center text-xs text-slate-400">No transactions recorded</div>
+            <div className="p-6 text-center text-xs text-slate-400">
+              {t('common:states.empty')}
+            </div>
           ) : (
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/75 text-slate-500 uppercase tracking-wider font-semibold text-[11px]">
-                  <th className="py-3 px-5">Date</th>
-                  <th className="py-3 px-5">Counterparty & Description</th>
-                  <th className="py-3 px-5">Category</th>
-                  <th className="py-3 px-5">Status</th>
-                  <th className="py-3 px-5 text-right">Amount</th>
+                  <th className="py-3 px-5">{t('transactions:columns.date')}</th>
+                  <th className="py-3 px-5">{t('transactions:columns.description')}</th>
+                  <th className="py-3 px-5">{t('transactions:columns.category')}</th>
+                  <th className="py-3 px-5">{t('transactions:columns.status')}</th>
+                  <th className="py-3 px-5 text-right">{t('transactions:columns.amount')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {recentTransactions.map((tx) => (
                   <tr key={tx.id} className="hover:bg-slate-50/70 transition-colors">
                     <td className="py-3.5 px-5 font-mono text-[11px] text-slate-500 whitespace-nowrap">
-                      {tx.date}
+                      {formatDate(tx.date)}
                     </td>
                     <td className="py-3.5 px-5">
                       <div className="font-semibold text-slate-900">{tx.description}</div>
@@ -280,12 +318,12 @@ export const DashboardPage: React.FC = () => {
                       {tx.status === 'paid' ? (
                         <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
                           <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                          Settled
+                          {t('common:status.paid')}
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/60">
                           <Clock className="w-3 h-3 text-amber-500" />
-                          Pending (AR/AP)
+                          {t('common:status.pending')}
                         </span>
                       )}
                     </td>

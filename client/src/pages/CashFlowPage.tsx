@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useFinancial } from '../context/FinancialContext';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/common/Card';
 import { StatusBadge } from '../components/common/StatusBadge';
@@ -6,7 +7,7 @@ import { Button } from '../components/common/Button';
 import { CashFlowOverviewChart } from '../components/dashboard/CashFlowOverviewChart';
 import { CashFlowForecastChart } from '../components/dashboard/CashFlowForecastChart';
 import { RecentAlertsList } from '../components/dashboard/RecentAlertsList';
-import { formatCurrency } from '../lib/utils';
+import { formatCurrency, formatNumber } from '../lib/utils';
 import { LoadingState } from '../components/common/LoadingState';
 import { ErrorAlert } from '../components/common/ErrorAlert';
 import { MonthlyFinancialSummary } from '../types';
@@ -36,13 +37,15 @@ export const CashFlowPage: React.FC = () => {
     resetDemoData,
   } = useFinancial();
 
+  const { t } = useTranslation(['cashflow', 'common', 'nav', 'transactions', 'dashboard']);
+
   const [isEditingOpeningBalance, setIsEditingOpeningBalance] = useState(false);
   const [openingBalanceInput, setOpeningBalanceInput] = useState(
     openingBalance !== null ? openingBalance.toString() : ''
   );
 
   if (loading || !summary) {
-    return <LoadingState message="Loading cash flow intelligence and projections..." fullHeight />;
+    return <LoadingState message={t('common:states.loadingData')} fullHeight />;
   }
 
   const monthlyList: MonthlyFinancialSummary[] = summary.monthlySummaries;
@@ -72,7 +75,7 @@ export const CashFlowPage: React.FC = () => {
     } else if (Number.isFinite(parsed)) {
       setOpeningBalance(parsed);
     } else {
-      alert('Please enter a valid numeric starting cash balance.');
+      alert(t('transactions:validation.amountPositive'));
       return;
     }
     setIsEditingOpeningBalance(false);
@@ -85,14 +88,14 @@ export const CashFlowPage: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-              Cash Flow Intelligence & Projections
+              {t('cashflow:header.title')}
             </h1>
             <StatusBadge variant="demo" size="md">
-              Transaction Engine
+              {t('common:badges.liveEngine')}
             </StatusBadge>
           </div>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Monthly cash conversion ledger, rolling balances, and deterministic 30-day baseline runway forecast
+            {t('cashflow:header.description')}
           </p>
         </div>
 
@@ -102,14 +105,14 @@ export const CashFlowPage: React.FC = () => {
             size="sm"
             onClick={resetDemoData}
             leftIcon={<RotateCcw className="w-3.5 h-3.5 text-slate-500" />}
-            title="Reset dataset back to default demo state"
+            title={t('common:buttons.refresh')}
           >
-            Reset Demo Data
+            {t('common:buttons.refresh')}
           </Button>
 
           <Link to="/transactions">
             <Button variant="primary" size="sm" rightIcon={<ArrowRight className="w-4 h-4" />}>
-              Manage Transactions
+              {t('nav:items.transactions')}
             </Button>
           </Link>
         </div>
@@ -117,7 +120,7 @@ export const CashFlowPage: React.FC = () => {
 
       {error && (
         <ErrorAlert
-          title="Cash Flow Calculation Error"
+          title={t('common:states.errorOccurred')}
           message={error}
           onRetry={refreshData}
           onDismiss={() => {}}
@@ -142,19 +145,19 @@ export const CashFlowPage: React.FC = () => {
           </div>
           <div>
             <div className="font-semibold text-slate-900 flex items-center gap-2">
-              <span>Opening Cash Balance:</span>
+              <span>{t('cashflow:summary.openingBalance')}:</span>
               {isOpeningConfigured ? (
                 <span className="font-mono text-blue-700 font-bold">
                   {formatCurrency(summary.openingBalance || 0)}
                 </span>
               ) : (
-                <span className="text-amber-700 font-bold">Not Configured</span>
+                <span className="text-amber-700 font-bold">{t('dashboard:metrics.unconfigured')}</span>
               )}
             </div>
             <p className="text-[11px] text-slate-500 mt-0.5">
               {isOpeningConfigured
-                ? 'Absolute bank holdings are calculated starting from this balance.'
-                : 'Opening balance is missing. Figures currently reflect cumulative net cash movements since inception.'}
+                ? t('cashflow:summary.openingTooltip')
+                : t('dashboard:metrics.currentCashTooltip')}
             </p>
           </div>
         </div>
@@ -175,14 +178,14 @@ export const CashFlowPage: React.FC = () => {
             <button
               onClick={handleSaveOpeningBalance}
               className="p-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              title="Save Opening Balance"
+              title={t('common:buttons.save')}
             >
               <Check className="w-4 h-4" />
             </button>
             <button
               onClick={() => setIsEditingOpeningBalance(false)}
               className="p-1.5 bg-slate-200 text-slate-600 rounded-lg hover:bg-slate-300 transition-colors"
-              title="Cancel"
+              title={t('common:buttons.cancel')}
             >
               <X className="w-4 h-4" />
             </button>
@@ -198,7 +201,7 @@ export const CashFlowPage: React.FC = () => {
             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold shadow-xs transition-colors shrink-0"
           >
             <Settings className="w-3.5 h-3.5 text-slate-500" />
-            <span>{isOpeningConfigured ? 'Change Balance' : 'Configure Starting Balance'}</span>
+            <span>{isOpeningConfigured ? t('common:buttons.edit') : t('cashflow:summary.openingBalance')}</span>
           </button>
         )}
       </div>
@@ -208,56 +211,56 @@ export const CashFlowPage: React.FC = () => {
         {/* Current Cash */}
         <div className="p-5 bg-white rounded-xl border border-slate-200/80 shadow-subtle flex flex-col justify-between">
           <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-            Current Operating Cash
+            {t('cashflow:summary.endingCash')}
           </span>
           <div className="mt-2 text-2xl font-bold text-slate-900 font-mono">
             {formatCurrency(summary.currentCashBalance)}
           </div>
           <span className="text-[11px] text-slate-400 mt-2 block">
             {isOpeningConfigured
-              ? 'Opening balance + verified paid movements'
-              : 'Cumulative net cash (opening balance not set)'}
+              ? t('dashboard:metrics.openingBalance') + ': ' + formatCurrency(summary.openingBalance || 0)
+              : t('dashboard:metrics.unconfigured')}
           </span>
         </div>
 
         {/* Avg Monthly Inflow */}
         <div className="p-5 bg-white rounded-xl border border-slate-200/80 shadow-subtle flex flex-col justify-between">
           <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-            Avg Monthly Inflows
+            {t('dashboard:metrics.inflow')}
           </span>
           <div className="mt-2 text-2xl font-bold text-emerald-700 font-mono">
             {hasMonthlyHistory
               ? `${avgMonthlyInflow > 0 ? '+' : ''}${formatCurrency(avgMonthlyInflow)}`
-              : 'N/A'}
+              : t('common:states.empty')}
           </div>
           <span className="text-[11px] text-slate-400 mt-2 block">
             {hasMonthlyHistory
-              ? `Across ${totalMonths} recorded calendar month${totalMonths === 1 ? '' : 's'}`
-              : 'No transaction history recorded'}
+              ? `${formatNumber(totalMonths)} ${t('common:units.months')}`
+              : t('common:states.empty')}
           </span>
         </div>
 
         {/* Avg Monthly Outflow */}
         <div className="p-5 bg-white rounded-xl border border-slate-200/80 shadow-subtle flex flex-col justify-between">
           <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-            Avg Monthly Outflows
+            {t('dashboard:metrics.outflow')}
           </span>
           <div className="mt-2 text-2xl font-bold text-slate-900 font-mono">
             {hasMonthlyHistory
               ? `${avgMonthlyOutflow > 0 ? '-' : ''}${formatCurrency(avgMonthlyOutflow)}`
-              : 'N/A'}
+              : t('common:states.empty')}
           </div>
           <span className="text-[11px] text-slate-400 mt-2 block">
             {hasMonthlyHistory
-              ? 'Operating expenses, facilities & payroll'
-              : 'No expense history recorded'}
+              ? t('transactions:categories.miscellaneous')
+              : t('common:states.empty')}
           </span>
         </div>
 
         {/* Net Monthly Run-Rate */}
         <div className="p-5 bg-white rounded-xl border border-slate-200/80 shadow-subtle flex flex-col justify-between">
           <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-            Avg Net Cash Flow
+            {t('cashflow:summary.netChange')}
           </span>
           <div
             className={`mt-2 text-2xl font-bold font-mono ${
@@ -270,12 +273,12 @@ export const CashFlowPage: React.FC = () => {
           >
             {hasMonthlyHistory
               ? `${avgMonthlyNet > 0 ? '+' : ''}${formatCurrency(avgMonthlyNet)}`
-              : 'N/A'}
+              : t('common:states.empty')}
           </div>
           <span className="text-[11px] text-slate-400 mt-2 block">
             {hasMonthlyHistory
-              ? 'Net cash generation rate per month'
-              : 'Requires completed monthly records'}
+              ? t('cashflow:summary.netChangeTooltip')
+              : t('common:states.empty')}
           </span>
         </div>
       </div>
@@ -298,13 +301,13 @@ export const CashFlowPage: React.FC = () => {
         <CardHeader>
           <div>
             <div className="flex items-center gap-2">
-              <CardTitle>Monthly Cash Flow & Balance Ledger</CardTitle>
+              <CardTitle>{t('cashflow:tabs.historical')}</CardTitle>
               <StatusBadge variant="demo" size="sm">
-                Verified Ledger
+                {t('common:badges.verifiedLedger')}
               </StatusBadge>
             </div>
             <CardDescription>
-              Chronological opening balance, realized cash movements, closing balances, and separate pending commitments
+              {t('cashflow:forecastSection.description')}
             </CardDescription>
           </div>
         </CardHeader>
@@ -313,21 +316,21 @@ export const CashFlowPage: React.FC = () => {
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/75 text-slate-500 uppercase tracking-wider font-semibold text-[11px]">
-                <th className="py-3 px-5">Month Period</th>
-                <th className="py-3 px-5 text-right">Opening Balance</th>
-                <th className="py-3 px-5 text-right">Paid Inflow</th>
-                <th className="py-3 px-5 text-right">Paid Outflow</th>
-                <th className="py-3 px-5 text-right">Net Cash Flow</th>
-                <th className="py-3 px-5 text-right">Closing Balance</th>
-                <th className="py-3 px-5 text-right">Pending Receivables (AR)</th>
-                <th className="py-3 px-5 text-right">Pending Payables (AP)</th>
+                <th className="py-3 px-5">{t('transactions:columns.date')}</th>
+                <th className="py-3 px-5 text-right">{t('cashflow:summary.openingBalance')}</th>
+                <th className="py-3 px-5 text-right">{t('dashboard:metrics.inflow')}</th>
+                <th className="py-3 px-5 text-right">{t('dashboard:metrics.outflow')}</th>
+                <th className="py-3 px-5 text-right">{t('cashflow:summary.netChange')}</th>
+                <th className="py-3 px-5 text-right">{t('cashflow:summary.endingCash')}</th>
+                <th className="py-3 px-5 text-right">{t('dashboard:metrics.pendingReceivables')}</th>
+                <th className="py-3 px-5 text-right">{t('dashboard:metrics.pendingPayables')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {monthlyList.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="py-8 text-center text-slate-400 text-xs">
-                    No monthly transaction history available. Create completed or pending transactions to populate the ledger.
+                    {t('common:states.noRecordsFound')}
                   </td>
                 </tr>
               ) : (
@@ -338,7 +341,7 @@ export const CashFlowPage: React.FC = () => {
                     <td className="py-3.5 px-5 font-semibold text-slate-900 whitespace-nowrap">
                       {m.monthLabel}
                       <span className="text-[10px] text-slate-400 block font-normal font-mono">
-                        {m.transactionCount} entries
+                        {formatNumber(m.transactionCount)} {t('common:units.transactions')}
                       </span>
                     </td>
                     <td className="py-3.5 px-5 text-right text-slate-600 font-mono">
@@ -400,7 +403,7 @@ export const CashFlowPage: React.FC = () => {
           <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
             <Info className="w-4 h-4 text-blue-600" />
             <h3 className="text-sm font-bold text-slate-900">
-              Forecasting Model Assumptions & Governance
+              {t('cashflow:forecastSection.assumptionsTitle')}
             </h3>
           </div>
 

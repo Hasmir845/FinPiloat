@@ -31,9 +31,20 @@ export const getTransactions = async (req: Request, res: Response, next: NextFun
   }
 };
 
+/**
+ * Validates transaction ID format (alphanumeric, dashes, underscores, max 64 chars).
+ * Blocks SQL/NoSQL query injection vectors and malformed ID paths.
+ */
+export const validateTransactionId = (id: unknown): string => {
+  if (typeof id !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(id)) {
+    throw new AppError(`Invalid transaction ID format: '${String(id)}'`, 400);
+  }
+  return id;
+};
+
 export const getTransactionById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = validateTransactionId(req.params.id);
     const transaction = await transactionRepository.getById(id);
 
     if (!transaction) {
@@ -72,7 +83,7 @@ export const createTransaction = async (req: Request, res: Response, next: NextF
 
 export const updateTransaction = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = validateTransactionId(req.params.id);
     const parseResult = UpdateTransactionSchema.safeParse(req.body);
 
     if (!parseResult.success) {
@@ -98,7 +109,7 @@ export const updateTransaction = async (req: Request, res: Response, next: NextF
 
 export const deleteTransaction = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = validateTransactionId(req.params.id);
     const deleted = await transactionRepository.delete(id);
 
     if (!deleted) {

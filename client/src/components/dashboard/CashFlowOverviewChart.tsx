@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -11,13 +12,14 @@ import {
 } from 'recharts';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../common/Card';
 import { StatusBadge } from '../common/StatusBadge';
-import { formatCurrency } from '../../lib/utils';
+import { formatCurrency, formatNumber } from '../../lib/utils';
 import { useFinancial } from '../../context/FinancialContext';
 import { CashFlowDataPoint } from '../../types';
 import { Skeleton } from '../common/LoadingState';
 
 export const CashFlowOverviewChart: React.FC = () => {
   const { summary, loading } = useFinancial();
+  const { t } = useTranslation(['dashboard', 'common']);
 
   if (loading || !summary) {
     return (
@@ -47,24 +49,24 @@ export const CashFlowOverviewChart: React.FC = () => {
       <CardHeader>
         <div>
           <div className="flex items-center gap-2">
-            <CardTitle>Cash Flow Trajectory ({chartData.length} Months)</CardTitle>
+            <CardTitle>{t('dashboard:charts.overviewTitle')}</CardTitle>
             <StatusBadge variant="demo" size="sm">
-              Derived from Transactions
+              {t('common:badges.verifiedLedger')}
             </StatusBadge>
           </div>
           <CardDescription>
-            Historical operating inflows vs. outgoing expenses with net monthly margin
+            {t('dashboard:charts.overviewDesc')}
           </CardDescription>
         </div>
 
         <div className="flex items-center gap-2 text-xs text-slate-500">
           <span className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-sm bg-blue-600 inline-block" />
-            Paid Inflows
+            {t('dashboard:charts.inflow')}
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-sm bg-slate-400 inline-block" />
-            Paid Outflows
+            {t('dashboard:charts.outflow')}
           </span>
         </div>
       </CardHeader>
@@ -73,7 +75,7 @@ export const CashFlowOverviewChart: React.FC = () => {
         <div className="h-72 w-full">
           {chartData.length === 0 ? (
             <div className="h-full flex items-center justify-center text-xs text-slate-400">
-              No monthly transaction data available
+              {t('dashboard:charts.noChartData')}
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
@@ -101,7 +103,7 @@ export const CashFlowOverviewChart: React.FC = () => {
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(value) => `$${value / 1000}k`}
+                  tickFormatter={(value) => `$${formatNumber(Math.round(value / 1000))}k`}
                 />
                 <Tooltip
                   content={({ active, payload, label }) => {
@@ -112,18 +114,18 @@ export const CashFlowOverviewChart: React.FC = () => {
                       return (
                         <div className="bg-slate-900 text-white rounded-lg p-3 shadow-dropdown text-xs space-y-1.5 border border-slate-700">
                           <p className="font-semibold text-slate-200 border-b border-slate-800 pb-1">
-                            {label} (Ledger Derived)
+                            {label}
                           </p>
                           <div className="flex items-center justify-between gap-4 text-blue-300">
-                            <span>Paid Inflows:</span>
+                            <span>{t('dashboard:charts.inflow')}:</span>
                             <span className="font-medium">{formatCurrency(inflowVal)}</span>
                           </div>
                           <div className="flex items-center justify-between gap-4 text-slate-300">
-                            <span>Paid Outflows:</span>
+                            <span>{t('dashboard:charts.outflow')}:</span>
                             <span className="font-medium">{formatCurrency(outflowVal)}</span>
                           </div>
                           <div className="flex items-center justify-between gap-4 pt-1 border-t border-slate-800 text-emerald-400 font-semibold">
-                            <span>Net Cash Flow:</span>
+                            <span>{t('dashboard:charts.net')}:</span>
                             <span>{formatCurrency(netVal)}</span>
                           </div>
                         </div>
@@ -136,7 +138,7 @@ export const CashFlowOverviewChart: React.FC = () => {
                 <Area
                   type="monotone"
                   dataKey="inflow"
-                  name="Paid Inflows"
+                  name={t('dashboard:charts.inflow')}
                   stroke="#2563EB"
                   strokeWidth={2}
                   fillOpacity={1}
@@ -145,7 +147,7 @@ export const CashFlowOverviewChart: React.FC = () => {
                 <Area
                   type="monotone"
                   dataKey="outflow"
-                  name="Paid Outflows"
+                  name={t('dashboard:charts.outflow')}
                   stroke="#64748B"
                   strokeWidth={2}
                   fillOpacity={1}

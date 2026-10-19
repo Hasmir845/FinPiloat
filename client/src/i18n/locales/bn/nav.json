@@ -1,0 +1,38 @@
+{
+  "items": {
+    "dashboard": "ড্যাশবোর্ড",
+    "transactions": "লেনদেন সমূহ",
+    "cashFlow": "অর্থপ্রবাহ",
+    "financing": "অর্থায়ন বিকল্প",
+    "copilot": "এআই কোপাইলট",
+    "productOverview": "পণ্য বিবরণী",
+    "corePillars": "মূল সুবিধাসমূহ",
+    "competitionContext": "প্রতিযোগিতা প্রসঙ্গ",
+    "architecture": "প্রযুক্তি কাঠামো"
+  },
+  "sections": {
+    "navigation": "মেনু নেভিগেশন",
+    "publicWebsite": "পাবলিক ওয়েবসাইট"
+  },
+  "badges": {
+    "liveDemo": "লাইভ ডেমো",
+    "liveEngine": "লাইভ ইঞ্জিন",
+    "forecast": "পূর্বাভাস",
+    "upcoming": "আসন্ন",
+    "preview": "প্রিভিউ"
+  },
+  "workspace": {
+    "title": "এপেক্স সাপ্লাই চেইন কো.",
+    "subtitle": "নমুনা এসএমই ডেমো"
+  },
+  "apiPill": {
+    "label": "এক্সপ্রেস এপিআই",
+    "connected": "সংযুক্ত",
+    "offline": "অফলাইন / যাচাই চলছে"
+  },
+  "header": {
+    "title": "ফিনপাইলট এআই",
+    "workspaceBadge": "এসএমই ডেমো ওয়ার্কস্পেস",
+    "aboutDemo": "ডেমো পরিচিতি"
+  }
+}

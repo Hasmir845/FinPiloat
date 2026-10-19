@@ -1,0 +1,51 @@
+{
+  "header": {
+    "title": "FinPilot AI Finance Copilot",
+    "description": "An interactive, data-grounded financial decision-support assistant powered by Google Gemini. Copilot answers questions using your authoritative financial records, deterministic cash flow projections, and active risk alerts.",
+    "statusConfigured": "Gemini Active",
+    "statusNotConfigured": "API Key Required",
+    "workspaceLabel": "Analyzing workspace:",
+    "singleWorkspaceNotice": "Single-workspace competition prototype"
+  },
+  "chips": {
+    "title": "Suggested Financial Questions:",
+    "cashBalance": "What is our current cash position and runway?",
+    "nextMonth": "What will happen to our cash in the next 30 days?",
+    "risks": "What financial risks require attention right now?",
+    "deficit": "Why do we have an operating deficit?",
+    "financing": "What financing options suit our cash flow profile?",
+    "receivables": "How much cash is trapped in pending invoices?"
+  },
+  "chat": {
+    "placeholder": "Ask Copilot about your cash balance, burn rate, risks, or financing...",
+    "send": "Send Prompt",
+    "thinking": "Copilot is analyzing ledger records...",
+    "clearChat": "Clear Conversation",
+    "newSession": "New Session",
+    "disclaimer": "FinPilot Copilot is a read-only decision-support tool. It cannot execute transactions, alter records, or provide certified accounting advice."
+  },
+  "drawer": {
+    "title": "Authoritative Grounding Context",
+    "subtitle": "Live figures supplied to Gemini system instructions",
+    "toggle": "View Context ({{count}} metrics)",
+    "asOfDate": "Anchor Date",
+    "cashBalance": "Current Cash Balance",
+    "netCashFlow": "Trailing Net Cash Flow",
+    "pendingAr": "Pending Receivables (AR)",
+    "pendingAp": "Pending Payables (AP)",
+    "forecastEnd": "Projected Ending Cash (Day 30)",
+    "runRate": "Daily Run-Rate Velocity",
+    "riskLevel": "Overall Risk Level",
+    "activeAlerts": "Active Risk Alerts ({{count}})",
+    "dataSufficiency": "Ledger Data Depth",
+    "dataWarning": "Sparse Data Notice: <30 days of transactions"
+  },
+  "errors": {
+    "notConfigured": "Gemini Copilot is not configured. Please add GEMINI_API_KEY to server/.env to enable AI features.",
+    "emptyMessage": "Message cannot be empty.",
+    "tooLong": "Message exceeds the maximum character limit.",
+    "rateLimit": "AI service is momentarily busy. Please try again in a few seconds.",
+    "networkError": "Failed to connect to AI Copilot service.",
+    "retry": "Retry Request"
+  }
+}

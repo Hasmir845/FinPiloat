@@ -1,0 +1,91 @@
+{
+  "header": {
+    "title": "Transaction Ledger Management",
+    "description": "Record, categorize, and reconcile income, expenses, pending invoices, and vendor bills with persistent MongoDB storage.",
+    "addTransaction": "New Transaction",
+    "exportCsv": "Export Records"
+  },
+  "columns": {
+    "date": "Date",
+    "description": "Description",
+    "type": "Type",
+    "category": "Category",
+    "counterparty": "Counterparty",
+    "amount": "Amount",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "types": {
+    "all": "All Types",
+    "income": "Income",
+    "expense": "Expense"
+  },
+  "categories": {
+    "all": "All Categories",
+    "revenue": "Revenue / Sales",
+    "consulting": "Consulting & Retainers",
+    "software": "Software & Subscriptions",
+    "rent": "Rent & Facilities",
+    "payroll": "Payroll & Contractors",
+    "supplies": "Office & Equipment Supplies",
+    "marketing": "Marketing & Advertising",
+    "utilities": "Utilities & Logistics",
+    "taxLegal": "Taxes & Legal Compliance",
+    "receivables": "Accounts Receivable",
+    "payables": "Accounts Payable",
+    "miscellaneous": "Miscellaneous Operating"
+  },
+  "filters": {
+    "searchPlaceholder": "Search description, counterparty...",
+    "typePlaceholder": "Filter by Type",
+    "categoryPlaceholder": "Filter by Category",
+    "statusPlaceholder": "Filter by Status",
+    "clear": "Reset Filters",
+    "showing": "Showing {{filtered}} of {{total}} transactions"
+  },
+  "modal": {
+    "addTitle": "Record New Transaction",
+    "editTitle": "Edit Transaction Record",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "e.g. Q2 Enterprise Retainer Payment",
+    "typeLabel": "Cash Movement Type",
+    "categoryLabel": "Financial Category",
+    "amountLabel": "Amount (USD $)",
+    "amountPlaceholder": "0.00",
+    "counterpartyLabel": "Counterparty (Client / Vendor)",
+    "counterpartyPlaceholder": "e.g. Acme Corp or Global Logistics Ltd.",
+    "dateLabel": "Transaction Date",
+    "statusLabel": "Settlement Status",
+    "notesLabel": "Internal Accounting Notes (Optional)",
+    "notesPlaceholder": "Add audit context or invoice reference numbers...",
+    "saving": "Saving Record...",
+    "save": "Save Transaction",
+    "cancel": "Cancel"
+  },
+  "deleteModal": {
+    "title": "Delete Transaction Record",
+    "message": "Are you sure you want to permanently delete this transaction? This action will immediately update your cash balance, burn metrics, and 30-day forecast.",
+    "confirm": "Yes, Delete Record",
+    "cancel": "Cancel",
+    "deleting": "Deleting..."
+  },
+  "validation": {
+    "descRequired": "Description is required (minimum 2 characters).",
+    "amountRequired": "A valid positive amount is required.",
+    "amountPositive": "Amount must be strictly greater than $0.00.",
+    "dateRequired": "Transaction date is required.",
+    "categoryRequired": "Please specify a category."
+  },
+  "pagination": {
+    "page": "Page {{current}} of {{total}}",
+    "previous": "Previous",
+    "next": "Next",
+    "rowsPerPage": "Rows per page:"
+  },
+  "alerts": {
+    "createSuccess": "Transaction successfully recorded.",
+    "updateSuccess": "Transaction successfully updated.",
+    "deleteSuccess": "Transaction successfully deleted.",
+    "errorOccurred": "Failed to complete transaction operation."
+  }
+}

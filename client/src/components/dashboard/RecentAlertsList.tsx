@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../common/Card';
 import { StatusBadge } from '../common/StatusBadge';
 import { AlertCircle, AlertTriangle, CheckCircle2, ChevronRight, ShieldCheck, ArrowRight, X } from 'lucide-react';
 import { RiskAlert } from '../../types';
 import { useFinancial } from '../../context/FinancialContext';
 import { Skeleton } from '../common/LoadingState';
+import { formatDate } from '../../lib/utils';
 
 export const RecentAlertsList: React.FC = () => {
   const { risks, loading } = useFinancial();
+  const { t } = useTranslation(['dashboard', 'common']);
   const [selectedAlert, setSelectedAlert] = useState<RiskAlert | null>(null);
 
   if (loading || !risks) {
@@ -36,7 +39,7 @@ export const RecentAlertsList: React.FC = () => {
         <CardHeader>
           <div>
             <div className="flex items-center gap-2">
-              <CardTitle>Cash Flow & Runway Alerts</CardTitle>
+              <CardTitle>{t('dashboard:alerts.sectionTitle')}</CardTitle>
               <StatusBadge
                 variant={
                   risks.overallRiskLevel === 'critical'
@@ -47,11 +50,11 @@ export const RecentAlertsList: React.FC = () => {
                 }
                 size="sm"
               >
-                {risks.overallRiskLevel.toUpperCase()} RISK
+                {t(`common:status.${risks.overallRiskLevel}`, risks.overallRiskLevel.toUpperCase())}
               </StatusBadge>
             </div>
             <CardDescription>
-              Early warning indicators calculated from cash velocity and pending ledger
+              {t('dashboard:alerts.sectionDesc')}
             </CardDescription>
           </div>
         </CardHeader>
@@ -63,10 +66,10 @@ export const RecentAlertsList: React.FC = () => {
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <p className="text-xs font-semibold text-slate-800">
-                No Elevated Financial Risks Detected
+                {t('dashboard:alerts.noAlertsTitle')}
               </p>
               <p className="text-[11px] text-slate-500 max-w-xs leading-relaxed">
-                Operating cash velocity, liquidity buffer, and invoice commitments are within stable parameters.
+                {t('dashboard:alerts.noAlertsDesc')}
               </p>
             </div>
           ) : (
@@ -109,7 +112,7 @@ export const RecentAlertsList: React.FC = () => {
                         {alertItem.title}
                       </span>
                       <StatusBadge variant={badgeVariant} size="sm">
-                        {alertItem.severity.toUpperCase()}
+                        {t(`common:status.${alertItem.severity}`, alertItem.severity.toUpperCase())}
                       </StatusBadge>
                     </div>
 
@@ -121,7 +124,7 @@ export const RecentAlertsList: React.FC = () => {
                       <span className="text-slate-500 font-medium truncate max-w-[200px]">
                         {alertItem.impact}
                       </span>
-                      <span className="shrink-0">{alertItem.date}</span>
+                      <span className="shrink-0">{formatDate(alertItem.date)}</span>
                     </div>
                   </div>
 
@@ -152,7 +155,7 @@ export const RecentAlertsList: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-slate-900">{selectedAlert.title}</h3>
-                  <span className="text-[11px] text-slate-400">Category: {selectedAlert.category}</span>
+                  <span className="text-[11px] text-slate-400">{selectedAlert.category}</span>
                 </div>
               </div>
               <button
@@ -177,7 +180,7 @@ export const RecentAlertsList: React.FC = () => {
               <div className="p-3 bg-blue-50/80 rounded-xl border border-blue-100 space-y-1">
                 <span className="font-semibold text-blue-900 block flex items-center gap-1.5">
                   <ArrowRight className="w-3.5 h-3.5 text-blue-600" />
-                  Recommended Action:
+                  {t('dashboard:alerts.suggestedAction')}:
                 </span>
                 <p className="text-blue-800 leading-relaxed">{selectedAlert.suggestedAction}</p>
               </div>
@@ -188,7 +191,7 @@ export const RecentAlertsList: React.FC = () => {
                 onClick={() => setSelectedAlert(null)}
                 className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors"
               >
-                Close Alert
+                {t('common:buttons.close')}
               </button>
             </div>
           </div>

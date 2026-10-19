@@ -1,0 +1,111 @@
+{
+  "brand": {
+    "name": "FinPilot",
+    "ai": "AI",
+    "tagline": "SME Finance Copilot"
+  },
+  "language": {
+    "selectorLabel": "Language",
+    "en": "English",
+    "bn": "বাংলা",
+    "switchToEn": "Switch to English",
+    "switchToBn": "বাংলায় পরিবর্তন করুন"
+  },
+  "buttons": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "filter": "Filter",
+    "clear": "Clear",
+    "close": "Close",
+    "back": "Back",
+    "submit": "Submit",
+    "export": "Export",
+    "refresh": "Refresh",
+    "loading": "Loading...",
+    "viewDetails": "View Details",
+    "learnMore": "Learn More",
+    "launchApp": "Launch App",
+    "exploreDemo": "Explore Demo Dashboard",
+    "confirm": "Confirm",
+    "retry": "Retry",
+    "search": "Search",
+    "apply": "Apply",
+    "copy": "Copy",
+    "copied": "Copied!"
+  },
+  "status": {
+    "paid": "Paid",
+    "pending": "Pending",
+    "overdue": "Overdue",
+    "cancelled": "Cancelled",
+    "active": "Active",
+    "connected": "Connected",
+    "offline": "Offline",
+    "checking": "Checking...",
+    "degraded": "Degraded",
+    "low": "Low",
+    "moderate": "Moderate",
+    "elevated": "Elevated",
+    "critical": "Critical"
+  },
+  "badges": {
+    "fintechMvp": "FinTech MVP",
+    "competitionSandbox": "Competition Sandbox",
+    "demoWorkspace": "SME Demo Workspace",
+    "demo": "Demo",
+    "liveDemo": "Live Demo",
+    "liveEngine": "Live Engine",
+    "forecast": "Forecast",
+    "upcoming": "Upcoming",
+    "preview": "Preview",
+    "illustrativeDemo": "Illustrative SME Demo",
+    "verifiedLedger": "Verified Ledger Data",
+    "userStated": "User-Stated Input"
+  },
+  "timeframes": {
+    "all": "All Time",
+    "last30Days": "Last 30 Days",
+    "last90Days": "Last 90 Days",
+    "last12Months": "Last 12 Months",
+    "asOf": "As of {{date}}"
+  },
+  "units": {
+    "days": "days",
+    "months": "months",
+    "years": "years",
+    "transactions": "transactions",
+    "items": "items"
+  },
+  "states": {
+    "empty": "No data available",
+    "noRecordsFound": "No records found matching your filters.",
+    "loadingData": "Loading financial data...",
+    "errorOccurred": "An error occurred while loading data.",
+    "pleaseWait": "Please wait a moment."
+  },
+  "apiStatus": {
+    "label": "API",
+    "connected": "Active (DB Connected)",
+    "offline": "Offline",
+    "degraded": "Degraded (DB Offline)",
+    "checking": "checking",
+    "refreshTitle": "Refresh backend status"
+  },
+  "aboutModal": {
+    "title": "About FinPilot AI",
+    "content": "FinPilot AI — SME Finance Copilot\n\nBuilt for international FinTech competition.\nAll figures shown in this prototype are illustrative demo data for demonstration purposes."
+  },
+  "notFound": {
+    "badge": "Error 404",
+    "title": "Page Not Found",
+    "description": "The route you are navigating to does not exist in the FinPilot AI workspace.",
+    "dashboardButton": "Go to Dashboard",
+    "homeButton": "Back to Home"
+  },
+  "footer": {
+    "copyright": "© {{year}} FinPilot AI • Competition Prototype",
+    "tagline": "Developed for international FinTech competition. Empowering small and medium enterprises with real-time financial intelligence, cash flow forecasting, and financing access."
+  }
+}

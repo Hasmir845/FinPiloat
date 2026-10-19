@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard,
   ArrowLeftRight,
@@ -21,44 +22,46 @@ interface SidebarProps {
   backendConnected?: boolean;
 }
 
-const navItems = [
-  {
-    name: 'Dashboard',
-    href: '/dashboard',
-    icon: LayoutDashboard,
-    badge: 'Live Demo',
-  },
-  {
-    name: 'Transactions',
-    href: '/transactions',
-    icon: ArrowLeftRight,
-    badge: 'Live Engine',
-  },
-  {
-    name: 'Cash Flow',
-    href: '/cash-flow',
-    icon: TrendingUp,
-    badge: 'Forecast',
-  },
-  {
-    name: 'Financing',
-    href: '/financing',
-    icon: Landmark,
-    badge: 'Upcoming',
-  },
-  {
-    name: 'AI Copilot',
-    href: '/copilot',
-    icon: Bot,
-    badge: 'Preview',
-  },
-];
-
 export const Sidebar: React.FC<SidebarProps> = ({
   isOpen,
   onClose,
   backendConnected = false,
 }) => {
+  const { t } = useTranslation(['nav', 'common']);
+
+  const navItems = [
+    {
+      name: t('nav:items.dashboard', 'Dashboard'),
+      href: '/dashboard',
+      icon: LayoutDashboard,
+      badge: t('nav:badges.liveDemo', 'Live Demo'),
+    },
+    {
+      name: t('nav:items.transactions', 'Transactions'),
+      href: '/transactions',
+      icon: ArrowLeftRight,
+      badge: t('nav:badges.liveEngine', 'Live Engine'),
+    },
+    {
+      name: t('nav:items.cashFlow', 'Cash Flow'),
+      href: '/cash-flow',
+      icon: TrendingUp,
+      badge: t('nav:badges.forecast', 'Forecast'),
+    },
+    {
+      name: t('nav:items.financing', 'Financing'),
+      href: '/financing',
+      icon: Landmark,
+      badge: t('nav:badges.upcoming', 'Upcoming'),
+    },
+    {
+      name: t('nav:items.copilot', 'AI Copilot'),
+      href: '/copilot',
+      icon: Bot,
+      badge: t('nav:badges.preview', 'Preview'),
+    },
+  ];
+
   return (
     <>
       {/* Mobile backdrop */}
@@ -85,10 +88,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
             <div>
               <span className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
-                FinPilot <span className="text-blue-600 text-xs px-1 py-0.5 rounded bg-blue-50 font-semibold border border-blue-100">AI</span>
+                FinPilot <span className="text-blue-600 text-xs px-1 py-0.5 rounded bg-blue-50 font-semibold border border-blue-100">{t('common:brand.ai')}</span>
               </span>
               <span className="block text-[10px] text-slate-500 font-medium uppercase tracking-wider">
-                SME Finance Copilot
+                {t('common:brand.tagline', 'SME Finance Copilot')}
               </span>
             </div>
           </NavLink>
@@ -107,16 +110,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="px-3 py-2 bg-indigo-50/70 border border-indigo-100 rounded-lg flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-              <span className="text-xs font-medium text-indigo-900">Competition Sandbox</span>
+              <span className="text-xs font-medium text-indigo-900">
+                {t('common:badges.competitionSandbox', 'Competition Sandbox')}
+              </span>
             </div>
-            <StatusBadge variant="demo" size="sm">Demo</StatusBadge>
+            <StatusBadge variant="demo" size="sm">
+              {t('common:badges.demo', 'Demo')}
+            </StatusBadge>
           </div>
         </div>
 
         {/* Navigation list */}
         <div className="flex-1 overflow-y-auto px-3 py-2 space-y-1">
           <div className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-            Navigation
+            {t('nav:sections.navigation', 'Navigation')}
           </div>
 
           {navItems.map((item) => {
@@ -150,7 +157,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       <span
                         className={cn(
                           'text-[10px] px-1.5 py-0.5 rounded font-medium',
-                          item.badge === 'Live Demo'
+                          item.badge === t('nav:badges.liveDemo') || item.badge === 'Live Demo'
                             ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'
                             : 'bg-slate-100 text-slate-600 border border-slate-200/60'
                         )}
@@ -165,7 +172,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           })}
 
           <div className="pt-4 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-            Public Website
+            {t('nav:sections.publicWebsite', 'Public Website')}
           </div>
           <NavLink
             to="/"
@@ -174,7 +181,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           >
             <div className="flex items-center gap-3">
               <ExternalLink className="w-4 h-4 text-slate-400" />
-              <span>Product Overview</span>
+              <span>{t('nav:items.productOverview', 'Product Overview')}</span>
             </div>
           </NavLink>
         </div>
@@ -188,10 +195,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </div>
               <div className="min-w-0 flex-1">
                 <div className="text-xs font-semibold text-slate-900 truncate">
-                  Apex Supply Chain Co.
+                  {t('nav:workspace.title', 'Apex Supply Chain Co.')}
                 </div>
                 <div className="text-[10px] text-slate-500 flex items-center gap-1">
-                  <span>Illustrative SME Demo</span>
+                  <span>{t('nav:workspace.subtitle', 'Illustrative SME Demo')}</span>
                 </div>
               </div>
             </div>
@@ -201,7 +208,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="flex items-center justify-between text-xs px-1">
             <span className="text-[11px] text-slate-500 flex items-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
-              Express API
+              {t('nav:apiPill.label', 'Express API')}
             </span>
             <span
               className={cn(
@@ -217,7 +224,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   backendConnected ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'
                 )}
               />
-              {backendConnected ? 'Connected' : 'Offline / Checking'}
+              {backendConnected ? t('nav:apiPill.connected') : t('nav:apiPill.offline')}
             </span>
           </div>
         </div>

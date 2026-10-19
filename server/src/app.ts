@@ -2,9 +2,17 @@ import express, { Application } from 'express';
 import cors from 'cors';
 import routes from './routes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
+import { securityHeaders } from './middleware/securityHeaders';
+import { apiRateLimiter } from './middleware/rateLimiter';
 
 export const createApp = (): Application => {
   const app = express();
+
+  // Hide server fingerprinting header
+  app.disable('x-powered-by');
+
+  // Defensive HTTP headers (OWASP best practice)
+  app.use(securityHeaders);
 
   // Allowed frontend origins from environment and local dev loopbacks
   const envOrigins = (process.env.CLIENT_ORIGIN || '')
@@ -19,10 +27,17 @@ export const createApp = (): Application => {
     'http://127.0.0.1:4173',
   ];
 
-  const allowedOriginsSet = new Set([...defaultDevOrigins, ...envOrigins]);
+  const allowedOriginsSet = new Set(
+    process.env.NODE_ENV === 'production'
+      ? envOrigins
+      : [...defaultDevOrigins, ...envOrigins]
+  );
 
-  // Regex to recognize any local loopback development origin (e.g. localhost:5174)
+  // Regex to recognize any local loopback development origin (disabled in production)
   const isLocalDevOrigin = (origin: string): boolean => {
+    if (process.env.NODE_ENV === 'production') {
+      return false;
+    }
     return /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
   };
 
@@ -32,7 +47,7 @@ export const createApp = (): Application => {
         // Allow requests with no origin (mobile apps, curl, server-to-server)
         if (!origin) return callback(null, true);
 
-        // Allow wildcard if configured
+        // Allow wildcard if explicitly configured
         if (allowedOriginsSet.has('*')) {
           return callback(null, true);
         }
@@ -51,9 +66,12 @@ export const createApp = (): Application => {
     })
   );
 
-  // Body parser middleware
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
+  // Body parser middleware with strict payload size limit (mitigates memory exhaustion DoS)
+  app.use(express.json({ limit: '200kb' }));
+  app.use(express.urlencoded({ extended: true, limit: '200kb' }));
+
+  // Global rate limiter on all API endpoints
+  app.use('/api', apiRateLimiter);
 
   // API base route
   app.use('/api', routes);

@@ -1,0 +1,158 @@
+{
+  "header": {
+    "title": "SME Financing & Capital Matcher",
+    "description": "Data-grounded capital readiness analysis and objective financing comparisons for small and mid-sized enterprises"
+  },
+  "banner": {
+    "title": "Objective Decision Support — Zero Invented Loan Guarantees",
+    "description": "FinPilot evaluates your borrowing readiness strictly against your verified MongoDB financial records. Options shown are illustrative market structures with transparent underwriting criteria. FinPilot is an analytical tool and does not process loan applications, guarantee approvals, or receive lender commissions."
+  },
+  "badges": {
+    "ruleBased": "Rule-Based Decision Support",
+    "illustrative": "Illustrative Benchmarks",
+    "illustrativeTag": "Illustrative",
+    "standardGuidelines": "Standard Guidelines"
+  },
+  "actions": {
+    "backToDashboard": "Back to Dashboard",
+    "runAssessment": "Run Capital Readiness Assessment",
+    "evaluating": "Evaluating Readiness & Matching Options..."
+  },
+  "snapshot": {
+    "title": "Authoritative Financial Position (Loaded from MongoDB)",
+    "dataQuality": "Data Quality:",
+    "operatingCash": "Operating Cash Balance",
+    "netCashFlow": "Cumulative Net Cash Flow",
+    "pendingReceivables": "Pending AR (Invoices)",
+    "pendingPayables": "Pending AP (Bills)"
+  },
+  "form": {
+    "title": "Financing Assessment Form",
+    "subtitle": "Enter your capital requirements to evaluate rule-matched financing structures",
+    "businessProfile": "1. Business Profile",
+    "capitalRequirement": "2. Capital Requirement",
+    "supplemental": "3. Supplemental Figures (Optional)",
+    "userProvided": "User-Provided",
+    "businessType": "Business Entity Type",
+    "industry": "Industry Sector",
+    "operatingMonths": "Operating Duration (Months)",
+    "operatingMonthsPlaceholder": "e.g. 24",
+    "monthsUnit": "months",
+    "operatingMonthsHint": "Underwriters distinguish early-stage (<12m) from established (>24m) businesses.",
+    "requestedAmount": "Requested Financing Amount ($ USD)",
+    "requestedAmountPlaceholder": "50,000",
+    "purpose": "Purpose of Financing",
+    "preferredRepayment": "Preferred Repayment Period",
+    "statedRevenue": "Approx. Monthly Revenue ($)",
+    "statedRevenuePlaceholder": "e.g. 60,000",
+    "existingDebt": "Monthly Debt Payments ($)",
+    "existingDebtPlaceholder": "e.g. 2,500",
+    "notes": "Context / Notes on Situation",
+    "notesPlaceholder": "Brief details about equipment quotes, client contracts, or seasonal timeline..."
+  },
+  "businessTypes": {
+    "llc": "Limited Liability Company (LLC)",
+    "corp": "Corporation (C-Corp / S-Corp)",
+    "sole": "Sole Proprietorship",
+    "partnership": "Partnership",
+    "other": "Other"
+  },
+  "industries": {
+    "wholesale": "Wholesale & Distribution",
+    "logistics": "Freight, Logistics & Warehousing",
+    "manufacturing": "Manufacturing & Assembly",
+    "technology": "Technology & Software Services",
+    "construction": "Construction & Commercial Trades",
+    "retail": "Retail & Multi-Channel E-Commerce",
+    "professional": "Professional & Corporate Services",
+    "healthcare": "Healthcare & Medical Practices",
+    "other": "Other Commercial Enterprise"
+  },
+  "purposes": {
+    "working_capital": "Working Capital & Liquidity Buffer",
+    "invoice_bridge": "Unpaid Customer Invoices (AR Bridge)",
+    "equipment_purchase": "Machinery, Vehicles or Equipment",
+    "inventory_purchase": "Inventory Stocking & Materials",
+    "growth_expansion": "Facility or Market Expansion",
+    "debt_refinancing": "Refinancing or Debt Consolidation"
+  },
+  "purposesDesc": {
+    "working_capital": "Smooth operational cash fluctuations, manage payroll, or bridge seasonal revenue dips.",
+    "invoice_bridge": "Unlock cash tied up in 30-90 day B2B accounts receivable without waiting for clients.",
+    "equipment_purchase": "Acquire capital equipment, vehicles, or software where the asset serves as security.",
+    "inventory_purchase": "Pre-purchase bulk raw materials or seasonal merchandise ahead of peak order cycles.",
+    "growth_expansion": "Open a new regional depot, expand warehouse square footage, or launch a product line.",
+    "debt_refinancing": "Restructure existing short-term obligations into lower-cost, extended amortization terms."
+  },
+  "repaymentOptions": {
+    "3": "3 Months (Short-term invoice / seasonal bridge)",
+    "6": "6 Months (Short-term working capital)",
+    "12": "12 Months (1 Year Line of Credit / Working Capital)",
+    "24": "24 Months (2 Years Amortized Term Loan)",
+    "36": "36 Months (3 Years Equipment / Term Loan)",
+    "60": "60 Months (5 Years Major Capital Expansion)"
+  },
+  "preState": {
+    "title": "Ready to Evaluate Capital Readiness",
+    "desc": "Complete the assessment form on the left with your business parameters. FinPilot will cross-reference your requested capital against actual cash balances, net operating velocity, and receivables in MongoDB.",
+    "pillar1Title": "Zero Hallucinations",
+    "pillar1Desc": "Calculations reflect strictly recorded ledger items and real cash balances.",
+    "pillar2Title": "Rule-Based Matching",
+    "pillar2Desc": "Transparent underwriting logic maps needs to appropriate capital structures.",
+    "pillar3Title": "Audit Checklist",
+    "pillar3Desc": "Generates a concrete checklist of documents required before applying."
+  },
+  "tabs": {
+    "options": "Matched Options ({{count}})",
+    "readiness": "Financial Readiness Audit",
+    "checklist": "Missing-Info Checklist ({{count}})"
+  },
+  "matchLevels": {
+    "strong_match": "Strong Match",
+    "potential_match": "Potential Match",
+    "caution_low_match": "Caution / Low Match"
+  },
+  "results": {
+    "aiTitle": "FinPilot AI Capital Analysis",
+    "rankedStructures": "Rule-Matched Financing Structures (Ranked by Compatibility)",
+    "matchScore": "Match Score:",
+    "relevance": "Relevance:",
+    "advantages": "Potential Advantages:",
+    "risks": "Key Risks / Considerations:",
+    "typicalRepayment": "Typical Repayment:",
+    "viewUnderwritingDetails": "View Underwriting Details",
+    "prepHeader": "Underwriting Preparation for: {{name}}",
+    "verifiedCriteria": "Verified Eligibility Criteria:",
+    "infoNeeded": "Information Needed to Finalize:",
+    "auditTitle": "Readiness Audit Findings",
+    "auditDesc": "Objective financial indicators synthesized from actual MongoDB records",
+    "riskProfile": "{{level}} RISK PROFILE",
+    "strengthsTitle": "Underwriting Strengths & Assets",
+    "noStrengths": "No strong positive indicators recorded yet.",
+    "concernsTitle": "Underwriting Concerns & Deficit Flags",
+    "noConcerns": "No high-severity concerns detected.",
+    "indicatorsTitle": "Calculated Underwriting Indicators",
+    "runwayMonths": "Runway Months",
+    "sustainable": "Sustainable / N/A",
+    "monthsUnit": "mos",
+    "monthlyRevEst": "Monthly Revenue Est.",
+    "unavailable": "Unavailable",
+    "source": "Source: {{source}}",
+    "debtToRevenue": "Debt-to-Revenue",
+    "unstated": "Unstated",
+    "checklistTitle": "Pre-Application Document Checklist",
+    "checklistDesc": "Documents institutional lenders will require to verify capacity before approving terms",
+    "checklistIntro": "Lenders verify physical bank records rather than self-reported numbers. Assembling the following materials drastically expedites review and secures higher approval odds:",
+    "disclosuresTitle": "Regulatory Disclosures & Next Steps"
+  },
+  "validation": {
+    "businessType": "Please select a business entity type",
+    "industry": "Please select an industry sector",
+    "operatingMonths": "Operating duration must be at least 1 month",
+    "requestedAmountMin": "Requested amount must be greater than $0",
+    "requestedAmountMax": "Requested amount cannot exceed $50,000,000",
+    "purpose": "Please select a financing purpose",
+    "preferredRepayment": "Repayment period must be at least 1 month",
+    "defaultError": "Failed to complete financing assessment"
+  }
+}

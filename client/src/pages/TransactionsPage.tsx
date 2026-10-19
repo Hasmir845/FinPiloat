@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useFinancial } from '../context/FinancialContext';
 import {
   Transaction,
@@ -14,7 +15,7 @@ import { EmptyState } from '../components/common/EmptyState';
 import { ErrorAlert } from '../components/common/ErrorAlert';
 import { TransactionModal } from '../components/transactions/TransactionModal';
 import { DeleteConfirmModal } from '../components/transactions/DeleteConfirmModal';
-import { formatCurrency } from '../lib/utils';
+import { formatCurrency, formatDate, formatNumber } from '../lib/utils';
 import {
   Plus,
   Search,
@@ -41,6 +42,8 @@ export const TransactionsPage: React.FC = () => {
     removeTransaction,
     resetDemoData,
   } = useFinancial();
+
+  const { t } = useTranslation(['transactions', 'common']);
 
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -107,10 +110,10 @@ export const TransactionsPage: React.FC = () => {
   const handleCreateOrUpdate = async (data: CreateTransactionInput) => {
     if (editingTransaction) {
       await editTransaction(editingTransaction.id, data as UpdateTransactionInput);
-      setActionSuccessMessage('Transaction updated and financial summaries recalculated.');
+      setActionSuccessMessage(t('transactions:alerts.updateSuccess'));
     } else {
       await addTransaction(data);
-      setActionSuccessMessage('Transaction added and cash ledger updated.');
+      setActionSuccessMessage(t('transactions:alerts.createSuccess'));
     }
     setTimeout(() => setActionSuccessMessage(null), 4000);
   };
@@ -120,7 +123,7 @@ export const TransactionsPage: React.FC = () => {
     setIsDeleting(true);
     try {
       await removeTransaction(deletingTransaction.id);
-      setActionSuccessMessage('Transaction removed and cash ledger updated.');
+      setActionSuccessMessage(t('transactions:alerts.deleteSuccess'));
       setDeletingTransaction(null);
       setTimeout(() => setActionSuccessMessage(null), 4000);
     } finally {
@@ -153,14 +156,14 @@ export const TransactionsPage: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-              Transaction Management
+              {t('transactions:header.title')}
             </h1>
             <StatusBadge variant="demo" size="md">
-              Live Engine
+              {t('common:badges.liveEngine')}
             </StatusBadge>
           </div>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Maintain verified cash movements, invoices, and operating commitments
+            {t('transactions:header.description')}
           </p>
         </div>
 
@@ -170,9 +173,9 @@ export const TransactionsPage: React.FC = () => {
             size="sm"
             onClick={resetDemoData}
             leftIcon={<RotateCcw className="w-3.5 h-3.5 text-slate-500" />}
-            title="Reset dataset back to default demo state"
+            title={t('common:buttons.refresh')}
           >
-            Reset Demo Data
+            {t('common:buttons.refresh')}
           </Button>
 
           <Button
@@ -184,7 +187,7 @@ export const TransactionsPage: React.FC = () => {
             }}
             leftIcon={<Plus className="w-4 h-4" />}
           >
-            Add Transaction
+            {t('transactions:header.addTransaction')}
           </Button>
         </div>
       </div>
@@ -200,7 +203,7 @@ export const TransactionsPage: React.FC = () => {
             onClick={() => setActionSuccessMessage(null)}
             className="text-emerald-700 hover:text-emerald-900 text-xs font-semibold"
           >
-            Dismiss
+            {t('common:buttons.close')}
           </button>
         </div>
       )}
@@ -208,7 +211,7 @@ export const TransactionsPage: React.FC = () => {
       {/* Error Banner */}
       {error && (
         <ErrorAlert
-          title="Financial Engine Sync Error"
+          title={t('common:states.errorOccurred')}
           message={error}
           onRetry={refreshData}
           onDismiss={() => {}}
@@ -219,7 +222,7 @@ export const TransactionsPage: React.FC = () => {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="p-3 bg-white rounded-xl border border-slate-200/80 shadow-subtle">
           <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">
-            Filtered Paid Inflow
+            {t('dashboard:metrics.inflow')}
           </span>
           <span className="text-lg font-bold text-emerald-700 mt-0.5 block">
             +{formatCurrency(stats.paidIn)}
@@ -228,7 +231,7 @@ export const TransactionsPage: React.FC = () => {
 
         <div className="p-3 bg-white rounded-xl border border-slate-200/80 shadow-subtle">
           <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">
-            Filtered Paid Outflow
+            {t('dashboard:metrics.outflow')}
           </span>
           <span className="text-lg font-bold text-slate-900 mt-0.5 block">
             -{formatCurrency(stats.paidOut)}
@@ -237,7 +240,7 @@ export const TransactionsPage: React.FC = () => {
 
         <div className="p-3 bg-white rounded-xl border border-slate-200/80 shadow-subtle">
           <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">
-            Pending Receivables (AR)
+            {t('dashboard:metrics.pendingReceivables')}
           </span>
           <span className="text-lg font-bold text-amber-700 mt-0.5 block">
             {formatCurrency(stats.pendingIn)}
@@ -246,10 +249,10 @@ export const TransactionsPage: React.FC = () => {
 
         <div className="p-3 bg-white rounded-xl border border-slate-200/80 shadow-subtle">
           <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">
-            Active Filter Records
+            {t('transactions:columns.actions')}
           </span>
           <span className="text-lg font-bold text-slate-900 mt-0.5 block">
-            {stats.count} of {transactions.length}
+            {formatNumber(stats.count)} / {formatNumber(transactions.length)}
           </span>
         </div>
       </div>
@@ -264,7 +267,7 @@ export const TransactionsPage: React.FC = () => {
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
               <input
                 type="text"
-                placeholder="Search description, counterparty, category..."
+                placeholder={t('transactions:filters.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-9 pr-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-slate-400"
@@ -279,9 +282,9 @@ export const TransactionsPage: React.FC = () => {
                 onChange={(e) => setTypeFilter(e.target.value as 'all' | 'income' | 'expense')}
                 className="px-2.5 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-700"
               >
-                <option value="all">All Types</option>
-                <option value="income">Income Only</option>
-                <option value="expense">Expense Only</option>
+                <option value="all">{t('transactions:types.all')}</option>
+                <option value="income">{t('transactions:types.income')}</option>
+                <option value="expense">{t('transactions:types.expense')}</option>
               </select>
 
               {/* Status Filter */}
@@ -290,9 +293,9 @@ export const TransactionsPage: React.FC = () => {
                 onChange={(e) => setStatusFilter(e.target.value as 'all' | 'paid' | 'pending')}
                 className="px-2.5 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-700"
               >
-                <option value="all">All Statuses</option>
-                <option value="paid">Settled (Paid)</option>
-                <option value="pending">Pending (Accrued)</option>
+                <option value="all">{t('common:timeframes.all')}</option>
+                <option value="paid">{t('common:status.paid')}</option>
+                <option value="pending">{t('common:status.pending')}</option>
               </select>
 
               {/* Category Filter */}
@@ -301,7 +304,7 @@ export const TransactionsPage: React.FC = () => {
                 onChange={(e) => setCategoryFilter(e.target.value)}
                 className="px-2.5 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-700 max-w-[150px]"
               >
-                <option value="all">All Categories</option>
+                <option value="all">{t('transactions:categories.all')}</option>
                 {TransactionCategoryValues.map((cat: string) => (
                   <option key={cat} value={cat}>
                     {cat}
@@ -316,7 +319,7 @@ export const TransactionsPage: React.FC = () => {
                 title="Toggle Date Sort Order"
               >
                 <ArrowUpDown className="w-3.5 h-3.5 text-slate-500" />
-                <span>Date: {sortOrder === 'desc' ? 'Newest' : 'Oldest'}</span>
+                <span>{t('transactions:columns.date')}: {sortOrder === 'desc' ? '↓' : '↑'}</span>
               </button>
 
               {hasActiveFilters && (
@@ -324,7 +327,7 @@ export const TransactionsPage: React.FC = () => {
                   onClick={clearAllFilters}
                   className="px-2.5 py-1.5 text-xs text-blue-600 hover:text-blue-800 hover:underline font-semibold"
                 >
-                  Clear Filters
+                  {t('transactions:filters.clear')}
                 </button>
               )}
             </div>
@@ -332,14 +335,14 @@ export const TransactionsPage: React.FC = () => {
 
           {/* Date range filter sub-row */}
           <div className="flex items-center gap-2 pt-1 text-xs text-slate-500">
-            <span className="font-semibold text-slate-700">Date Range:</span>
+            <span className="font-semibold text-slate-700">{t('transactions:columns.date')}:</span>
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
               className="px-2 py-1 bg-white border border-slate-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
-            <span>to</span>
+            <span>-</span>
             <input
               type="date"
               value={endDate}
@@ -351,14 +354,14 @@ export const TransactionsPage: React.FC = () => {
 
         {/* Content Body */}
         {loading ? (
-          <LoadingState message="Loading financial transactions..." />
+          <LoadingState message={t('common:states.loadingData')} />
         ) : filteredTransactions.length === 0 ? (
           <div className="p-8">
             <EmptyState
               icon={<Filter className="w-6 h-6 text-slate-400" />}
-              title="No transactions match criteria"
-              description="Try adjusting your search query, clearing date filters, or record a new transaction."
-              actionLabel={hasActiveFilters ? 'Clear All Filters' : 'Add New Transaction'}
+              title={t('common:states.noRecordsFound')}
+              description={t('common:states.empty')}
+              actionLabel={hasActiveFilters ? t('transactions:filters.clear') : t('transactions:header.addTransaction')}
               onAction={
                 hasActiveFilters
                   ? clearAllFilters
@@ -374,12 +377,12 @@ export const TransactionsPage: React.FC = () => {
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/75 text-slate-500 uppercase tracking-wider font-semibold text-[11px]">
-                  <th className="py-3 px-5">Date</th>
-                  <th className="py-3 px-5">Description & Counterparty</th>
-                  <th className="py-3 px-5">Category</th>
-                  <th className="py-3 px-5">Status</th>
-                  <th className="py-3 px-5 text-right">Amount</th>
-                  <th className="py-3 px-5 text-center">Actions</th>
+                  <th className="py-3 px-5">{t('transactions:columns.date')}</th>
+                  <th className="py-3 px-5">{t('transactions:columns.description')}</th>
+                  <th className="py-3 px-5">{t('transactions:columns.category')}</th>
+                  <th className="py-3 px-5">{t('transactions:columns.status')}</th>
+                  <th className="py-3 px-5 text-right">{t('transactions:columns.amount')}</th>
+                  <th className="py-3 px-5 text-center">{t('transactions:columns.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -387,7 +390,7 @@ export const TransactionsPage: React.FC = () => {
                   <tr key={tx.id} className="hover:bg-slate-50/75 transition-colors group">
                     {/* Date */}
                     <td className="py-3.5 px-5 whitespace-nowrap text-slate-500 font-mono text-[11px]">
-                      {tx.date}
+                      {formatDate(tx.date)}
                     </td>
 
                     {/* Description & Counterparty */}
@@ -420,12 +423,12 @@ export const TransactionsPage: React.FC = () => {
                       {tx.status === 'paid' ? (
                         <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
                           <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                          Settled
+                          {t('common:status.paid')}
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/60">
                           <Clock className="w-3 h-3 text-amber-500" />
-                          Pending
+                          {t('common:status.pending')}
                         </span>
                       )}
                     </td>
@@ -455,14 +458,14 @@ export const TransactionsPage: React.FC = () => {
                             setIsModalOpen(true);
                           }}
                           className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                          title="Edit transaction"
+                          title={t('common:buttons.edit')}
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => setDeletingTransaction(tx)}
                           className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                          title="Delete transaction"
+                          title={t('common:buttons.delete')}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -485,7 +488,6 @@ export const TransactionsPage: React.FC = () => {
         }}
         onSubmit={handleCreateOrUpdate}
         initialData={editingTransaction}
-        title={editingTransaction ? 'Edit Financial Transaction' : 'Record New Transaction'}
       />
 
       {/* Delete Confirmation Modal */}

@@ -1,0 +1,38 @@
+{
+  "items": {
+    "dashboard": "Dashboard",
+    "transactions": "Transactions",
+    "cashFlow": "Cash Flow",
+    "financing": "Financing",
+    "copilot": "AI Copilot",
+    "productOverview": "Product Overview",
+    "corePillars": "Core Pillars",
+    "competitionContext": "Competition Context",
+    "architecture": "Architecture"
+  },
+  "sections": {
+    "navigation": "Navigation",
+    "publicWebsite": "Public Website"
+  },
+  "badges": {
+    "liveDemo": "Live Demo",
+    "liveEngine": "Live Engine",
+    "forecast": "Forecast",
+    "upcoming": "Upcoming",
+    "preview": "Preview"
+  },
+  "workspace": {
+    "title": "Apex Supply Chain Co.",
+    "subtitle": "Illustrative SME Demo"
+  },
+  "apiPill": {
+    "label": "Express API",
+    "connected": "Connected",
+    "offline": "Offline / Checking"
+  },
+  "header": {
+    "title": "FinPilot AI",
+    "workspaceBadge": "SME Demo Workspace",
+    "aboutDemo": "About Demo"
+  }
+}

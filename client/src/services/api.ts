@@ -8,6 +8,11 @@ import {
   FinancialSummaryResponse,
   CashFlowForecastResponse,
   RiskAnalysisResponse,
+  CopilotStatusResponseData,
+  CopilotChatResponseData,
+  FinancingAssessmentInput,
+  FinancingReadinessAssessment,
+  FinancingAssessmentResponseData,
 } from '../types';
 
 export class ApiError extends Error {
@@ -265,6 +270,77 @@ class ApiClient {
     const res = await this.request<{ success: boolean; data: RiskAnalysisResponse }>(
       `/financial/risks${query}`,
       { method: 'GET' }
+    );
+    return res.data;
+  }
+
+  /**
+   * Fetch Gemini Copilot configuration and workspace status
+   */
+  public async getCopilotStatus(): Promise<CopilotStatusResponseData> {
+    const res = await this.request<{ success: boolean; data: CopilotStatusResponseData }>(
+      '/copilot/status',
+      { method: 'GET' }
+    );
+    return res.data;
+  }
+
+  /**
+   * Send a chat prompt to the Gemini Copilot assistant grounded in authoritative financial data
+   */
+  public async sendCopilotMessage(payload: {
+    message: string;
+    history?: Array<{ role: 'user' | 'model'; content: string }>;
+    asOfDate?: string;
+    openingBalance?: number;
+    minimumCashThreshold?: number;
+    language?: 'en' | 'bn';
+  }): Promise<CopilotChatResponseData> {
+    const res = await this.request<{ success: boolean; data: CopilotChatResponseData }>(
+      '/copilot/chat',
+      {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }
+    );
+    return res.data;
+  }
+
+  /**
+   * Fetch quick financial readiness summary from MongoDB records
+   */
+  public async getFinancingReadiness(
+    openingBalance?: number | null,
+    asOfDate?: string
+  ): Promise<FinancingReadinessAssessment> {
+    const params = new URLSearchParams();
+    if (typeof openingBalance === 'number' && Number.isFinite(openingBalance)) {
+      params.append('openingBalance', openingBalance.toString());
+    }
+    if (asOfDate) {
+      params.append('asOfDate', asOfDate);
+    }
+    const query = params.toString() ? `?${params.toString()}` : '';
+
+    const res = await this.request<{ success: boolean; data: FinancingReadinessAssessment }>(
+      `/financing/readiness${query}`,
+      { method: 'GET' }
+    );
+    return res.data;
+  }
+
+  /**
+   * Submit SME financing parameters for readiness analysis, rule-based matching, and AI explanation
+   */
+  public async submitFinancingAssessment(
+    payload: FinancingAssessmentInput
+  ): Promise<FinancingAssessmentResponseData> {
+    const res = await this.request<{ success: boolean; data: FinancingAssessmentResponseData }>(
+      '/financing/assess',
+      {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }
     );
     return res.data;
   }

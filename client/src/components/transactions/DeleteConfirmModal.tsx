@@ -1,7 +1,8 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Transaction } from '../../types';
 import { Button } from '../common/Button';
-import { formatCurrency } from '../../lib/utils';
+import { formatCurrency, formatDate } from '../../lib/utils';
 import { AlertTriangle, X } from 'lucide-react';
 
 interface DeleteConfirmModalProps {
@@ -19,6 +20,8 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
   transaction,
   isDeleting,
 }) => {
+  const { t } = useTranslation(['transactions', 'common']);
+
   if (!isOpen || !transaction) return null;
 
   return (
@@ -38,35 +41,34 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
         </div>
 
         <div>
-          <h3 className="text-base font-bold text-slate-900">Confirm Deletion</h3>
+          <h3 className="text-base font-bold text-slate-900">{t('transactions:deleteModal.title')}</h3>
           <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-            Are you sure you want to permanently delete this transaction? All derived financial
-            summaries, runway estimates, and cash flow charts will be immediately recalculated.
+            {t('transactions:deleteModal.message')}
           </p>
         </div>
 
         <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-xs space-y-1.5">
           <div className="flex justify-between text-slate-600">
-            <span>Description:</span>
+            <span>{t('transactions:columns.description')}:</span>
             <span className="font-semibold text-slate-900">{transaction.description}</span>
           </div>
           <div className="flex justify-between text-slate-600">
-            <span>Amount:</span>
+            <span>{t('transactions:columns.amount')}:</span>
             <span className="font-semibold text-slate-900">
-              {formatCurrency(transaction.amount)} ({transaction.type.toUpperCase()})
+              {formatCurrency(transaction.amount)} ({t(`transactions:types.${transaction.type}`)})
             </span>
           </div>
           <div className="flex justify-between text-slate-600">
-            <span>Date & Status:</span>
+            <span>{t('transactions:columns.date')} & {t('transactions:columns.status')}:</span>
             <span>
-              {transaction.date} &bull; {transaction.status.toUpperCase()}
+              {formatDate(transaction.date)} &bull; {t(`common:status.${transaction.status}`)}
             </span>
           </div>
         </div>
 
         <div className="pt-2 flex items-center justify-end gap-3">
           <Button variant="outline" size="sm" onClick={onClose} disabled={isDeleting}>
-            Cancel
+            {t('common:buttons.cancel')}
           </Button>
           <Button
             variant="danger"
@@ -74,7 +76,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
             onClick={onConfirm}
             isLoading={isDeleting}
           >
-            Delete Transaction
+            {t('transactions:deleteModal.confirm')}
           </Button>
         </div>
       </div>

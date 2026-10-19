@@ -1,0 +1,50 @@
+{
+  "hero": {
+    "badge": "International FinTech Competition Prototype",
+    "titlePrefix": "Intelligent Financial Copilot for",
+    "titleHighlight": "Growing SMEs",
+    "subtitle": "Bridge the gap between raw bookkeeping records and executive decision-making. Monitor operating cash velocity, evaluate deterministic 30-day forward forecasts, and discover verified financing options without ungrounded AI hallucinations.",
+    "launchApp": "Explore Live Sandbox",
+    "viewFeatures": "Inspect Architecture",
+    "trustNotice": "Read-Only Analytical Architecture • Persistent MongoDB Ledger • Google Gemini Decision Support"
+  },
+  "pillars": {
+    "title": "Four Pillars of SME Financial Intelligence",
+    "subtitle": "Purpose-built for small businesses to survive volatile cash cycles and prepare for institutional capital.",
+    "pillar1Title": "Cash Velocity & Reconciled Ledgers",
+    "pillar1Desc": "Track operating cash in real time with cents-precision arithmetic. Keep paid cash separate from pending invoices with zero floating-point errors.",
+    "pillar2Title": "Mathematical 30-Day Forward Forecast",
+    "pillar2Desc": "Deterministic forward projection combining historical velocity with 90% conservative receivables collection and 100% scheduled vendor commitments.",
+    "pillar3Title": "Automated Anomaly & Risk Detection",
+    "pillar3Desc": "Continuous risk evaluation detecting accelerated burn rates, projected liquidity shortfalls, and aging overdue invoices before they damage operations.",
+    "pillar4Title": "Grounded AI Decision Support",
+    "pillar4Desc": "Official Google GenAI SDK integration with Gemini Flash. All AI explanations are anchored directly into calculated financial context."
+  },
+  "competition": {
+    "title": "Built for Competition Rigor",
+    "subtitle": "FinPilot AI demonstrates production-grade architecture designed for SME financial inclusion.",
+    "point1Title": "Zero Hallucination Guarantee",
+    "point1Desc": "The LLM never invents or calculates authoritative financial balances. All numbers are computed deterministically on the backend.",
+    "point2Title": "Dual-Language Accessibility",
+    "point2Desc": "Complete bilingual capability in English and Bangla, empowering local entrepreneurs with native-language financial intelligence.",
+    "point3Title": "Responsible Financing Match",
+    "point3Desc": "Penalizes predatory fixed debt during cash deficits. Recommends working capital lines and invoice factoring only when supported by verified cash velocity."
+  },
+  "cta": {
+    "title": "Ready to Experience FinPilot AI?",
+    "subtitle": "Step into the sandbox workspace with pre-seeded demo transactions, cash flow analytics, and interactive Copilot.",
+    "button": "Launch Live Application"
+  },
+  "architecture": {
+    "title": "Architecture & Technology Stack",
+    "frontend": "Frontend",
+    "frontendStack": "React 18 + Vite + TypeScript",
+    "i18n": "i18n Localization",
+    "i18nStack": "English + বাংলা (i18next)",
+    "backend": "Backend Server",
+    "backendStack": "Node.js + Express + TypeScript",
+    "database": "Database & AI",
+    "databaseStack": "MongoDB Atlas + Gemini Flash",
+    "healthEndpoint": "check endpoint:"
+  }
+}

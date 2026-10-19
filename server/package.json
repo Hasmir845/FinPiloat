@@ -8,9 +8,10 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test src/services/__tests__/financialCalculations.test.ts src/repositories/__tests__/transactionRepository.test.ts"
+    "test": "tsx --test src/services/__tests__/financialCalculations.test.ts src/repositories/__tests__/transactionRepository.test.ts src/services/__tests__/copilotService.test.ts src/controllers/__tests__/copilotController.test.ts src/services/__tests__/financingService.test.ts src/controllers/__tests__/financingController.test.ts src/services/__tests__/i18n.test.ts src/services/__tests__/e2eFinancialWorkflow.test.ts src/middleware/__tests__/securityAndRateLimiter.test.ts"
   },
   "dependencies": {
+    "@google/genai": "^2.30.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -12,7 +13,7 @@ import {
 } from 'recharts';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../common/Card';
 import { StatusBadge } from '../common/StatusBadge';
-import { formatCurrency } from '../../lib/utils';
+import { formatCurrency, formatNumber, formatDate } from '../../lib/utils';
 import { useFinancial } from '../../context/FinancialContext';
 import { ForecastDataPoint } from '../../types';
 import { Skeleton } from '../common/LoadingState';
@@ -20,6 +21,7 @@ import { AlertCircle, Calendar, TrendingDown, TrendingUp, Info } from 'lucide-re
 
 export const CashFlowForecastChart: React.FC = () => {
   const { forecast, loading } = useFinancial();
+  const { t } = useTranslation(['cashflow', 'common']);
   const [viewMode, setViewMode] = useState<'balance' | 'movements'>('balance');
 
   if (loading || !forecast) {
@@ -48,13 +50,13 @@ export const CashFlowForecastChart: React.FC = () => {
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div>
               <div className="flex items-center gap-2">
-                <CardTitle className="text-amber-900">Next-30-Day Cash Flow Forecast</CardTitle>
+                <CardTitle className="text-amber-900">{t('cashflow:forecastSection.title')}</CardTitle>
                 <StatusBadge variant="warning" size="sm">
-                  Insufficient Data
+                  {t('cashflow:sufficiency.warningTitle')}
                 </StatusBadge>
               </div>
               <CardDescription className="text-amber-700">
-                Baseline forecasting requires representative transaction history
+                {t('cashflow:sufficiency.insufficientDesc')}
               </CardDescription>
             </div>
           </div>
@@ -65,14 +67,14 @@ export const CashFlowForecastChart: React.FC = () => {
           </div>
           <div className="max-w-md space-y-1">
             <h4 className="text-sm font-semibold text-slate-800">
-              Historical Transaction History Too Sparse
+              {t('cashflow:sufficiency.warningTitle')}
             </h4>
             <p className="text-xs text-slate-600 leading-relaxed">
               {dataSufficiency.statusMessage}
             </p>
           </div>
           <div className="text-[11px] text-slate-500 bg-white px-4 py-2 rounded-lg border border-slate-200 mt-2">
-            <strong>Required:</strong> At least {dataSufficiency.minimumRequiredDays} days of recorded operations & {dataSufficiency.minimumRequiredTransactions} paid transactions
+            <strong>{t('common:status.active')}:</strong> {t('cashflow:sufficiency.daysRecorded', { days: formatNumber(dataSufficiency.historicalDays) })} & {t('cashflow:sufficiency.txRecorded', { count: formatNumber(dataSufficiency.paidTransactionCount) })}
           </div>
         </CardContent>
       </Card>
@@ -87,13 +89,13 @@ export const CashFlowForecastChart: React.FC = () => {
       <CardHeader>
         <div>
           <div className="flex items-center gap-2 flex-wrap">
-            <CardTitle>Next-30-Day Projected Cash Trajectory</CardTitle>
+            <CardTitle>{t('cashflow:forecastSection.title')}</CardTitle>
             <StatusBadge variant="info" size="sm">
-              Deterministic Baseline Run-Rate (Estimate)
+              {t('common:badges.forecast')}
             </StatusBadge>
           </div>
           <CardDescription>
-            Forward-looking daily balance modeling incorporating 60-day operating velocity and scheduled invoices
+            {t('cashflow:forecastSection.description')}
           </CardDescription>
         </div>
 
@@ -107,7 +109,7 @@ export const CashFlowForecastChart: React.FC = () => {
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Projected Balance
+              {t('cashflow:charts.projectedBalance')}
             </button>
             <button
               onClick={() => setViewMode('movements')}
@@ -117,7 +119,7 @@ export const CashFlowForecastChart: React.FC = () => {
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Daily Movements
+              {t('cashflow:tabs.historical')}
             </button>
           </div>
         </div>
@@ -127,13 +129,13 @@ export const CashFlowForecastChart: React.FC = () => {
         {/* Trajectory Key Indicators */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50/75 p-3 rounded-xl border border-slate-200/70 text-xs">
           <div>
-            <span className="text-[11px] text-slate-500 block">Starting Cash</span>
+            <span className="text-[11px] text-slate-500 block">{t('cashflow:summary.openingBalance')}</span>
             <span className="font-bold font-mono text-slate-900">
               {formatCurrency(startingCashBalance)}
             </span>
           </div>
           <div>
-            <span className="text-[11px] text-slate-500 block">30-Day Ending Cash</span>
+            <span className="text-[11px] text-slate-500 block">{t('cashflow:forecastSection.projectedEnding')}</span>
             <span
               className={`font-bold font-mono ${
                 projectedEndingBalance < 0 ? 'text-rose-700' : 'text-slate-900'
@@ -143,7 +145,7 @@ export const CashFlowForecastChart: React.FC = () => {
             </span>
           </div>
           <div>
-            <span className="text-[11px] text-slate-500 block">30-Day Net Drift</span>
+            <span className="text-[11px] text-slate-500 block">{t('cashflow:forecastSection.netForecastChange')}</span>
             <span
               className={`font-bold font-mono inline-flex items-center gap-0.5 ${
                 isNetPositive ? 'text-emerald-700' : 'text-rose-700'
@@ -159,10 +161,9 @@ export const CashFlowForecastChart: React.FC = () => {
             </span>
           </div>
           <div>
-            <span className="text-[11px] text-slate-500 block">Scheduled AR / AP</span>
+            <span className="text-[11px] text-slate-500 block">{t('dashboard:metrics.burnRate')}</span>
             <span className="font-mono text-slate-700">
-              +{formatCurrency(forecast.totalScheduledPendingInflow * 0.85)} / -
-              {formatCurrency(forecast.totalScheduledPendingOutflow)}
+              {formatCurrency(forecast.dailyAverageBurnOrGain)}{t('cashflow:forecastSection.perDay')}
             </span>
           </div>
         </div>
@@ -195,7 +196,7 @@ export const CashFlowForecastChart: React.FC = () => {
                 fontSize={11}
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(value) => `$${Math.round(value / 1000)}k`}
+                tickFormatter={(value) => `$${formatNumber(Math.round(value / 1000))}k`}
               />
               <Tooltip
                 content={({ active, payload }) => {
@@ -206,13 +207,13 @@ export const CashFlowForecastChart: React.FC = () => {
                         <div className="flex items-center justify-between gap-2 border-b border-slate-800 pb-1 font-semibold text-slate-200">
                           <span className="flex items-center gap-1">
                             <Calendar className="w-3 h-3 text-blue-400" />
-                            {data.date} (Day {data.dayIndex})
+                            {formatDate(data.date)} ({t('cashflow:charts.dayLabel', { day: formatNumber(data.dayIndex) })})
                           </span>
-                          <span className="text-[10px] text-slate-400 font-normal">Estimate</span>
+                          <span className="text-[10px] text-slate-400 font-normal">{t('common:badges.forecast')}</span>
                         </div>
 
                         <div className="flex items-center justify-between gap-4 text-blue-300 font-bold">
-                          <span>Projected Balance:</span>
+                          <span>{t('cashflow:charts.projectedBalance')}:</span>
                           <span
                             className={data.projectedBalance < 0 ? 'text-rose-400' : 'text-blue-300'}
                           >
@@ -221,17 +222,17 @@ export const CashFlowForecastChart: React.FC = () => {
                         </div>
 
                         <div className="flex items-center justify-between gap-4 text-emerald-400">
-                          <span>Expected Inflow:</span>
+                          <span>{t('cashflow:charts.inflows')}:</span>
                           <span>+{formatCurrency(data.expectedInflow)}</span>
                         </div>
 
                         <div className="flex items-center justify-between gap-4 text-slate-300">
-                          <span>Expected Outflow:</span>
+                          <span>{t('cashflow:charts.outflows')}:</span>
                           <span>-{formatCurrency(data.expectedOutflow)}</span>
                         </div>
 
                         <div className="flex items-center justify-between gap-4 border-t border-slate-800 pt-1 text-slate-300">
-                          <span>Net Day Movement:</span>
+                          <span>{t('cashflow:charts.netVelocity')}:</span>
                           <span
                             className={
                               data.netMovement >= 0 ? 'text-emerald-400' : 'text-rose-400'
@@ -259,7 +260,7 @@ export const CashFlowForecastChart: React.FC = () => {
                   y={0}
                   stroke="#E11D48"
                   strokeDasharray="4 4"
-                  label={{ value: 'Cash Deficit ($0)', fill: '#E11D48', fontSize: 10, position: 'right' }}
+                  label={{ value: t('dashboard:metrics.cashDeficit'), fill: '#E11D48', fontSize: 10, position: 'right' }}
                 />
               )}
 
@@ -267,7 +268,7 @@ export const CashFlowForecastChart: React.FC = () => {
                 <Area
                   type="monotone"
                   dataKey="projectedBalance"
-                  name="Projected Balance"
+                  name={t('cashflow:charts.projectedBalance')}
                   stroke="#2563EB"
                   strokeWidth={2}
                   fillOpacity={1}
@@ -277,13 +278,13 @@ export const CashFlowForecastChart: React.FC = () => {
                 <>
                   <Bar
                     dataKey="expectedInflow"
-                    name="Expected Inflow"
+                    name={t('cashflow:charts.inflows')}
                     fill="#10B981"
                     radius={[2, 2, 0, 0]}
                   />
                   <Bar
                     dataKey="expectedOutflow"
-                    name="Expected Outflow"
+                    name={t('cashflow:charts.outflows')}
                     fill="#64748B"
                     radius={[2, 2, 0, 0]}
                   />
@@ -297,7 +298,7 @@ export const CashFlowForecastChart: React.FC = () => {
         <div className="p-3 bg-blue-50/60 rounded-lg border border-blue-100 flex items-start gap-2.5 text-[11px] text-blue-900">
           <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
           <div className="leading-relaxed">
-            <strong>Deterministic Forecast Methodology:</strong> Daily trajectory extrapolates trailing 60-day paid operating run-rate ({formatCurrency(forecast.dailyAverageBurnOrGain)}/day) and incorporates scheduled pending customer receivables (85% realization factor) and payables (100% fulfillment). This represents a benchmark run-rate, not a guaranteed prediction.
+            <strong>{t('cashflow:forecastSection.assumptionsTitle')}:</strong> {t('cashflow:forecastSection.disclaimer')}
           </div>
         </div>
       </CardContent>

@@ -1,12 +1,14 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { MetricCard } from '../common/MetricCard';
 import { Wallet, Hourglass, ArrowUpRight, Receipt } from 'lucide-react';
 import { useFinancial } from '../../context/FinancialContext';
-import { formatCurrency, formatPercent } from '../../lib/utils';
+import { formatCurrency, formatPercent, formatNumber } from '../../lib/utils';
 import { Skeleton } from '../common/LoadingState';
 
 export const FinancialSummaryGrid: React.FC = () => {
   const { summary, transactions, loading } = useFinancial();
+  const { t } = useTranslation(['dashboard', 'common']);
 
   if (loading || !summary) {
     return (
@@ -22,7 +24,7 @@ export const FinancialSummaryGrid: React.FC = () => {
     );
   }
 
-  // Current month (October 2026 or latest available)
+  // Current month
   const monthlyList = summary.monthlySummaries;
   const currentMonthSummary = monthlyList[monthlyList.length - 1];
   const previousMonthSummary = monthlyList.length >= 2 ? monthlyList[monthlyList.length - 2] : null;
@@ -35,10 +37,10 @@ export const FinancialSummaryGrid: React.FC = () => {
   }
 
   // 2. Estimated Runway calculation based on average monthly paid expenses
-  let runwayText = 'Not available';
+  let runwayText = t('common:states.empty', 'Not available');
   let runwayTrend: 'up' | 'down' | 'neutral' = 'neutral';
   let runwayStatus: 'positive' | 'warning' | 'negative' | 'neutral' = 'neutral';
-  let runwayTimeframe = 'Insufficient burn data';
+  let runwayTimeframe = t('dashboard:metrics.unconfigured');
 
   const nonZeroExpenseMonths = monthlyList.filter((m) => m.paidExpense > 0);
   if (nonZeroExpenseMonths.length > 0) {
@@ -46,10 +48,10 @@ export const FinancialSummaryGrid: React.FC = () => {
     const avgMonthlyBurn = totalExp / nonZeroExpenseMonths.length;
     if (avgMonthlyBurn > 0) {
       const months = (currentCash / avgMonthlyBurn).toFixed(1);
-      runwayText = `${months} Months`;
+      runwayText = t('dashboard:metrics.runwayMonths', { months: formatNumber(Number(months), 1) });
       runwayTrend = Number(months) >= 3 ? 'up' : 'down';
       runwayStatus = Number(months) >= 4 ? 'positive' : Number(months) >= 2 ? 'warning' : 'negative';
-      runwayTimeframe = `based on $${Math.round(avgMonthlyBurn / 1000)}k/mo avg burn`;
+      runwayTimeframe = `${t('dashboard:metrics.burnRate')}: ~${formatCurrency(avgMonthlyBurn)}/${t('common:units.months')}`;
     }
   }
 
@@ -69,57 +71,57 @@ export const FinancialSummaryGrid: React.FC = () => {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Total Operating Cash */}
       <MetricCard
-        title="Total Operating Cash"
+        title={t('dashboard:metrics.currentCash')}
         value={formatCurrency(currentCash)}
         change={cashChangePct !== 0 ? formatPercent(cashChangePct) : '0.0%'}
         trend={cashChangePct >= 0 ? 'up' : 'down'}
-        timeframe="vs prior month end"
+        timeframe={t('dashboard:metrics.currentCashTooltip')}
         status={cashChangePct >= 0 ? 'positive' : 'warning'}
         icon={<Wallet className="w-4 h-4 text-blue-600" />}
         subtitle={
           summary.isOpeningBalanceConfigured
-            ? 'Opening balance + verified paid cash receipts'
-            : 'Cumulative net cash (opening balance not set)'
+            ? t('dashboard:metrics.openingBalance') + ': ' + formatCurrency(summary.openingBalance || 0)
+            : t('dashboard:metrics.unconfigured')
         }
         isDemo={true}
       />
 
       {/* Estimated Cash Runway */}
       <MetricCard
-        title="Estimated Cash Runway"
+        title={t('dashboard:metrics.runway')}
         value={runwayText}
-        change={runwayText !== 'Not available' ? 'Active' : undefined}
+        change={runwayText !== t('common:states.empty') ? t('common:status.active') : undefined}
         trend={runwayTrend}
         timeframe={runwayTimeframe}
         status={runwayStatus}
         icon={<Hourglass className="w-4 h-4 text-emerald-600" />}
-        subtitle="Operating months before liquidity depletion"
+        subtitle={t('dashboard:metrics.runwayTooltip')}
         isDemo={true}
       />
 
       {/* Net Monthly Cash Flow */}
       <MetricCard
-        title="Net Monthly Cash Flow"
+        title={t('dashboard:metrics.netCashFlow')}
         value={netMonthlyFormatted}
-        change={currentMonthSummary ? currentMonthSummary.monthLabel : 'Current Period'}
+        change={currentMonthSummary ? currentMonthSummary.monthLabel : t('common:timeframes.all')}
         trend={netMonthlyTrend}
-        timeframe="Paid inflows minus paid outflows"
+        timeframe={t('dashboard:metrics.netCashFlowTooltip')}
         status={netMonthlyStatus}
         icon={<ArrowUpRight className="w-4 h-4 text-amber-600" />}
-        subtitle="Realized operating cash velocity"
+        subtitle={isNetPositive ? t('dashboard:metrics.positiveFlow') : t('dashboard:metrics.cashDeficit')}
         isDemo={true}
       />
 
       {/* Pending Receivables (AR) */}
       <MetricCard
-        title="Pending Receivables (AR)"
+        title={t('dashboard:metrics.pendingReceivables')}
         value={pendingIncomeFormatted}
-        change={`${pendingIncomeCount} pending invoice${pendingIncomeCount === 1 ? '' : 's'}`}
+        change={`${formatNumber(pendingIncomeCount)} ${t('common:units.items')}`}
         trend="neutral"
-        timeframe="Awaiting customer settlement"
+        timeframe={t('dashboard:metrics.pendingReceivablesTooltip')}
         status={pendingReceivablesTotal > 0 ? 'warning' : 'neutral'}
         icon={<Receipt className="w-4 h-4 text-indigo-600" />}
-        subtitle="Accrued revenue, strictly not in cash"
+        subtitle={t('transactions:categories.receivables')}
         isDemo={true}
       />
     </div>
