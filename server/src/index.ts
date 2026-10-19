@@ -10,7 +10,8 @@ import {
 } from './db/connection';
 import { transactionRepository } from './repositories/transactionRepository';
 
-const PORT = process.env.PORT || 5001;
+const PORT = Number(process.env.PORT) || 5001;
+const HOST = '0.0.0.0';
 export const app = createApp();
 
 const isServerless = Boolean(
@@ -48,10 +49,14 @@ export async function startServer(): Promise<void> {
     console.warn('[FinPilot Server] Starting in degraded mode (database-backed endpoints will return 503 until configured).');
   }
 
-  const server = app.listen(PORT, () => {
-    console.log(`[FinPilot Server] Running at http://localhost:${PORT}`);
-    console.log(`[FinPilot Server] Health check available at http://localhost:${PORT}/api/health`);
-    console.log(`[FinPilot Server] Allowed client origin: ${process.env.CLIENT_ORIGIN || 'http://localhost:5173'}`);
+  const server = app.listen(PORT, HOST, () => {
+    console.log(`[FinPilot Server] Running at http://${HOST}:${PORT}`);
+    console.log(`[FinPilot Server] Health check available at http://${HOST}:${PORT}/api/health`);
+    console.log(
+      `[FinPilot Server] Allowed client origin: ${
+        process.env.CLIENT_ORIGIN || process.env.CLIENT_URL || 'http://localhost:5173'
+      }`
+    );
     console.log(
       `[FinPilot Server] Database status: ${
         isDatabaseConnected() ? 'CONNECTED & READY' : 'DISCONNECTED (NOT READY)'

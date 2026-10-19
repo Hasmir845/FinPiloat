@@ -14,10 +14,14 @@ export const createApp = (): Application => {
   // Defensive HTTP headers (OWASP best practice)
   app.use(securityHeaders);
 
-  // Allowed frontend origins from environment and local dev loopbacks
-  const envOrigins = (process.env.CLIENT_ORIGIN || '')
-    .split(',')
-    .map((origin) => origin.trim())
+  // Allowed frontend origins from environment (supports CLIENT_ORIGIN and CLIENT_URL) and dev loopbacks
+  const rawEnvOrigins = [
+    ...(process.env.CLIENT_ORIGIN || '').split(','),
+    ...(process.env.CLIENT_URL || '').split(','),
+  ];
+
+  const envOrigins = rawEnvOrigins
+    .map((origin) => origin.trim().replace(/\/+$/, ''))
     .filter(Boolean);
 
   const defaultDevOrigins = [
@@ -52,8 +56,10 @@ export const createApp = (): Application => {
           return callback(null, true);
         }
 
+        const normalizedOrigin = origin.replace(/\/+$/, '');
+
         // Allow explicitly defined origins or local development origins
-        if (allowedOriginsSet.has(origin) || isLocalDevOrigin(origin)) {
+        if (allowedOriginsSet.has(normalizedOrigin) || isLocalDevOrigin(normalizedOrigin)) {
           return callback(null, true);
         }
 
@@ -62,7 +68,7 @@ export const createApp = (): Application => {
       },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
     })
   );
 

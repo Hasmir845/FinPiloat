@@ -32,7 +32,7 @@
 | `MONGODB_URI` | **Yes** | `mongodb+srv://<user>:<password>@cluster.mongodb.net/?retryWrites=true&w=majority` | Connection URI for MongoDB Atlas staging database cluster. | **CRITICAL SECRET** |
 | `MONGODB_DB_NAME` | No | `finpilot` | Target MongoDB database name. | Low |
 | `GEMINI_API_KEY` | **Yes** | `<Google_AI_Studio_API_Key>` | API key for Gemini model inference. Read strictly on the backend. | **CRITICAL SECRET** |
-| `GEMINI_MODEL` | No | `gemini-3.5-flash` | Gemini model name identifier supported by your API key. | Low |
+| `GEMINI_MODEL` | No | `gemini-2.5-flash` | Gemini model name identifier supported by your API key. | Low |
 
 ### 2.2 Frontend Environment Variables (`client`)
 
@@ -88,9 +88,10 @@
 ### Phase B: Deploying Backend to Render
 1. Log into [Render Dashboard](https://dashboard.render.com/).
 2. Click **New +** -> **Web Service**.
-3. Connect your Git repository (`finpilot-ai`).
+3. Connect your Git repository: `https://github.com/Hasmir845/FinPiloat`
 4. Configure service parameters:
-   - **Name:** `finpilot-server-staging`
+   - **Name:** `finpilot-server` (or `finpilot-server-staging`)
+   - **Region:** Choose region closest to your MongoDB Atlas cluster (e.g., `Oregon (US West)` or `Frankfurt (EU Central)`)
    - **Root Directory:** `server`
    - **Environment:** `Node`
    - **Build Command:** `npm install && npm run build`
@@ -98,11 +99,12 @@
    - **Health Check Path:** `/api/health`
 5. Under **Environment Variables**, add:
    - `NODE_ENV`: `production`
-   - `MONGODB_URI`: `<Your MongoDB Atlas Connection String>`
+   - `MONGODB_URI`: `<Your MongoDB Atlas Connection String>` (e.g., `mongodb+srv://user:pass@cluster.mongodb.net/finpilot?retryWrites=true&w=majority`)
    - `MONGODB_DB_NAME`: `finpilot`
-   - `GEMINI_API_KEY`: `<Your Google AI Studio API Key>`
-   - `GEMINI_MODEL`: `gemini-3.5-flash`
-   - `CLIENT_ORIGIN`: `http://localhost:5173` *(Temporary placeholder; will update in Phase D)*
+   - `GEMINI_API_KEY`: `<Your Google Gemini API Key>`
+   - `GEMINI_MODEL`: `gemini-2.5-flash`
+   - `CLIENT_ORIGIN`: `<Your Netlify Production URL>` (e.g., `https://fin-piloat-ai.netlify.app` — without trailing slash)
+   - `CLIENT_URL`: `<Your Netlify Production URL>` (optional alias)
 6. Click **Create Web Service**. Wait for the build and deployment to complete.
 7. Test backend health: Open `https://<your-render-service-name>.onrender.com/api/health` in your browser. Expected output:
    ```json
@@ -117,30 +119,19 @@
      }
    }
    ```
+   > [!NOTE]
+   > The `/api/health` endpoint responds immediately with 200 OK without blocking on MongoDB or Gemini. If MongoDB is connecting or disconnected, it returns `"status": "degraded"` with 200 OK.
 
-### Phase C: Deploying Frontend to Vercel
-1. Log into [Vercel Dashboard](https://vercel.com/).
-2. Click **Add New...** -> **Project**.
-3. Import the `finpilot-ai` repository.
-4. In the project configuration:
-   - **Framework Preset:** `Vite`
-   - **Root Directory:** Click Edit and select `client`.
-   - **Build Command:** `npm run build`
-   - **Output Directory:** `dist`
-5. Under **Environment Variables**, add:
-   - `VITE_API_URL`: `https://<your-render-service-name>.onrender.com/api`
-   - `VITE_APP_NAME`: `FinPilot AI`
-6. Click **Deploy**. Vercel will bundle the React application and deploy to edge servers.
-7. Note the generated staging URL (e.g., `https://finpilot-ai-staging.vercel.app`).
-
-### Phase D: Finalizing CORS Handshake
-1. Return to the Render dashboard for `finpilot-server-staging`.
-2. Navigate to **Environment**.
-3. Update `CLIENT_ORIGIN` to the exact Vercel staging URL:
+### Phase C: Netlify / Vercel Frontend Connection
+1. In your Netlify frontend dashboard (or `.env.production`), ensure the API endpoint points to Render:
    ```text
-   CLIENT_ORIGIN=https://finpilot-ai-staging.vercel.app
+   VITE_API_URL=https://<your-render-service-name>.onrender.com/api
    ```
-4. Save changes. Render will automatically redeploy the backend with the new origin whitelist.
+2. In Render environment settings, ensure `CLIENT_ORIGIN` matches your Netlify frontend URL exactly:
+   ```text
+   CLIENT_ORIGIN=https://fin-piloat-ai.netlify.app
+   ```
+3. The Express CORS handler normalizes trailing slashes and supports comma-separated multiple origins.
 
 ---
 
